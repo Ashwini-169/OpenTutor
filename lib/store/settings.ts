@@ -148,6 +148,9 @@ export interface SettingsState {
   chatAreaCollapsed: boolean;
   chatAreaWidth: number;
 
+  // Language & Translation settings
+  hindiModeEnabled: boolean; // Enable Hindi translation for speech, lecture, and chat
+
   // Actions
   setModel: (providerId: ProviderId, modelId: string) => void;
   setProviderConfig: (providerId: ProviderId, config: Partial<ProvidersConfig[ProviderId]>) => void;
@@ -166,6 +169,9 @@ export interface SettingsState {
   setSidebarCollapsed: (collapsed: boolean) => void;
   setChatAreaCollapsed: (collapsed: boolean) => void;
   setChatAreaWidth: (width: number) => void;
+
+  // Translation actions
+  setHindiModeEnabled: (enabled: boolean) => void;
 
   // Audio actions
   setTTSProvider: (providerId: TTSProviderId) => void;
@@ -451,6 +457,9 @@ export const useSettingsStore = create<SettingsState>()(
         chatAreaCollapsed: true,
         chatAreaWidth: 320,
 
+        // Language & Translation settings
+        hindiModeEnabled: false,
+
         // Audio settings (use defaults)
         ...defaultAudioConfig,
 
@@ -512,6 +521,9 @@ export const useSettingsStore = create<SettingsState>()(
         setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
         setChatAreaCollapsed: (collapsed) => set({ chatAreaCollapsed: collapsed }),
         setChatAreaWidth: (width) => set({ chatAreaWidth: width }),
+
+        // Translation actions
+        setHindiModeEnabled: (enabled) => set({ hindiModeEnabled: enabled }),
 
         // Audio actions
         setTTSProvider: (providerId) =>

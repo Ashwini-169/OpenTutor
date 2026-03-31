@@ -854,16 +854,58 @@ Question types: ${quizConfig.questionTypes.join(', ')}`,
   log.debug(`Got ${generatedQuestions.length} questions for: ${outline.title}`);
 
   // Ensure each question has an ID and normalize options format
-  const questions: QuizQuestion[] = generatedQuestions.map((q) => {
-    const isText = q.type === 'short_answer';
-    return {
-      ...q,
-      id: q.id || `q_${nanoid(8)}`,
-      options: isText ? undefined : normalizeQuizOptions(q.options),
-      answer: isText ? undefined : normalizeQuizAnswer(q as unknown as Record<string, unknown>),
-      hasAnswer: isText ? false : true,
-    };
-  });
+  const questions: QuizQuestion[] = generatedQuestions
+    .map((q) => {
+      const isText = q.type === 'short_answer';
+      const normalizedOptions = isText ? undefined : normalizeQuizOptions(q.options);
+      const normalizedAnswer = isText ? undefined : normalizeQuizAnswer(q as unknown as Record<string, unknown>, normalizedOptions);
+
+      return {
+        ...q,
+        id: q.id || `q_${nanoid(8)}`,
+        options: normalizedOptions,
+        answer: normalizedAnswer,
+        hasAnswer: isText ? false : normalizedAnswer !== undefined && normalizedAnswer.length > 0,
+      };
+    })
+    .filter((q) => {
+      // Filter out invalid questions
+      if (q.type === 'short_answer') return true; // short answer questions are always valid
+      
+      // For choice questions, must have options and valid answer
+      if (!q.options || q.options.length === 0) {
+        log.warn(`Filtering out question without options: ${q.question}`);
+        return false;
+      }
+      
+      if (!q.answer || q.answer.length === 0) {
+        log.warn(`Filtering out question without valid correct answer: ${q.question}`);
+        return false;
+      }
+      
+      // Verify answer values exist in options
+      const optionValues = q.options.map((opt) => opt.value);
+      const validAnswer = q.answer.every((ans) => optionValues.includes(ans));
+      if (!validAnswer) {
+        log.warn(
+          `Filtering out question with invalid answer values: ${q.question}. Answer: ${q.answer.join(', ')}, Available: ${optionValues.join(', ')}`,
+        );
+        return false;
+      }
+      
+      return true;
+    });
+
+  if (questions.length === 0) {
+    log.error(`No valid questions generated for: ${outline.title}. All questions were filtered out.`);
+    return null;
+  }
+
+  if (questions.length < (generatedQuestions.length * 0.5)) {
+    log.warn(
+      `Only ${questions.length}/${generatedQuestions.length} questions were valid for: ${outline.title}`,
+    );
+  }
 
   return { questions };
 }
@@ -898,11 +940,47 @@ function normalizeQuizOptions(
 }
 
 /**
+ * Map answer text to option letter value.
+ * If AI returns "Option A", map it to "A" based on the normalized options.
+ */
+function mapAnswerTextToValue(
+  answerText: string | undefined,
+  options: { value: string; label: string }[] | undefined,
+): string | undefined {
+  if (!answerText || !options) return undefined;
+
+  const trimmed = answerText.trim();
+
+  // Direct lookup: if answer text matches an option label exactly
+  const matching = options.find((opt) => opt.label === trimmed);
+  if (matching) return matching.value;
+
+  // Try case-insensitive match
+  const caseInsensitiveMatch = options.find(
+    (opt) => opt.label.toLowerCase() === trimmed.toLowerCase(),
+  );
+  if (caseInsensitiveMatch) return caseInsensitiveMatch.value;
+
+  // If answer is already a single letter (A, B, C, D), validate it exists in options
+  if (/^[A-D]$/.test(trimmed)) {
+    if (options.find((opt) => opt.value === trimmed)) {
+      return trimmed;
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Normalize quiz answer from AI response.
  * AI may generate correctAnswer as string or string[], under various field names.
  * This normalizes to string[] format matching option values.
+ * Now validates against normalized options and maps text answers to letter values.
  */
-function normalizeQuizAnswer(question: Record<string, unknown>): string[] | undefined {
+function normalizeQuizAnswer(
+  question: Record<string, unknown>,
+  normalizedOptions: { value: string; label: string }[] | undefined,
+): string[] | undefined {
   // AI might use "correctAnswer", "answer", or "correct_answer"
   const raw =
     question.answer ??
@@ -910,10 +988,18 @@ function normalizeQuizAnswer(question: Record<string, unknown>): string[] | unde
     (question as Record<string, unknown>).correct_answer;
   if (!raw) return undefined;
 
-  if (Array.isArray(raw)) {
-    return raw.map(String);
+  const answers: string[] = Array.isArray(raw) ? raw.map(String) : [String(raw)];
+
+  // Map text answers to option values
+  const mappedAnswers: string[] = [];
+  for (const ans of answers) {
+    const mapped = mapAnswerTextToValue(ans, normalizedOptions);
+    if (mapped) {
+      mappedAnswers.push(mapped);
+    }
   }
-  return [String(raw)];
+
+  return mappedAnswers.length > 0 ? mappedAnswers : undefined;
 }
 
 /**

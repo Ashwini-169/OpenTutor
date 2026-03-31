@@ -14,6 +14,12 @@ export const WEB_SEARCH_PROVIDERS: Record<WebSearchProviderId, WebSearchProvider
     requiresApiKey: true,
     defaultBaseUrl: 'https://api.tavily.com',
   },
+  duckduckgo: {
+    id: 'duckduckgo',
+    name: 'DuckDuckGo',
+    requiresApiKey: false,
+    defaultBaseUrl: 'https://api.duckduckgo.com',
+  },
 };
 
 /**

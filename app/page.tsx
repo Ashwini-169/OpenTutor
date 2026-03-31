@@ -251,6 +251,8 @@ function HomePage() {
 
     try {
       const userProfile = useUserProfileStore.getState();
+      const settings = useSettingsStore.getState();
+      const webSearchConfig = settings.webSearchProvidersConfig?.[settings.webSearchProviderId];
       const requirements: UserRequirements = {
         requirement: form.requirement,
         language: form.language,
@@ -268,13 +270,11 @@ function HomePage() {
         pdfStorageKey = await storePdfBlob(form.pdfFile);
         pdfFileName = form.pdfFile.name;
 
-        const settings = useSettingsStore.getState();
-        pdfProviderId = settings.pdfProviderId;
-        const providerCfg = settings.pdfProvidersConfig?.[settings.pdfProviderId];
-        if (providerCfg) {
+        const pdfProviderCfg = settings.pdfProvidersConfig?.[settings.pdfProviderId];
+        if (pdfProviderCfg) {
           pdfProviderConfig = {
-            apiKey: providerCfg.apiKey,
-            baseUrl: providerCfg.baseUrl,
+            apiKey: pdfProviderCfg.apiKey,
+            baseUrl: pdfProviderCfg.baseUrl,
           };
         }
       }
@@ -291,6 +291,9 @@ function HomePage() {
         pdfProviderConfig,
         sceneOutlines: null,
         currentStep: 'generating' as const,
+        // Web search settings
+        webSearchProviderId: settings.webSearchProviderId,
+        webSearchApiKey: webSearchConfig?.apiKey,
       };
       sessionStorage.setItem('generationSession', JSON.stringify(sessionState));
 

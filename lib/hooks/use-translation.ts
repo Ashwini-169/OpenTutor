@@ -21,7 +21,7 @@ import {
   detectLanguage,
   clearTranslationCache,
   type TargetLanguage,
-} from './translate-service';
+} from '@/lib/i18n/translate-service';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('useTranslation');
@@ -167,7 +167,7 @@ export function useTranslation(options: UseTranslationOptions = {}): UseTranslat
  *   const [hindi1, hindi2] = await translateBatch(['Hello', 'World']);
  */
 
-import { translateBatch } from './translate-service';
+import { translateBatch } from '@/lib/i18n/translate-service';
 
 interface UseTranslationBatchResult {
   translateBatch: (texts: string[], lang?: TargetLanguage) => Promise<string[]>;

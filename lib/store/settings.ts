@@ -313,9 +313,10 @@ const getDefaultVideoConfig = () => ({
 
 // Initialize default Web Search config
 const getDefaultWebSearchConfig = () => ({
-  webSearchProviderId: 'tavily' as WebSearchProviderId,
+  webSearchProviderId: 'duckduckgo' as WebSearchProviderId, // Default to free DuckDuckGo
   webSearchProvidersConfig: {
     tavily: { apiKey: '', baseUrl: '', enabled: true },
+    duckduckgo: { apiKey: '', baseUrl: '', enabled: true },
   } as Record<WebSearchProviderId, { apiKey: string; baseUrl: string; enabled: boolean }>,
 });
 

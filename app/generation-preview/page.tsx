@@ -365,6 +365,7 @@ function GenerationPreviewContent() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             query: currentSession.requirements.requirement,
+            provider: wsSettings.webSearchProviderId || 'duckduckgo',
             apiKey: wsApiKey || undefined,
           }),
           signal,

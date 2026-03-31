@@ -19,7 +19,8 @@ import { createLogger } from '@/lib/logger';
 import { parseModelString } from '@/lib/ai/providers';
 import { resolveApiKey, resolveWebSearchApiKey } from '@/lib/server/provider-config';
 import { resolveModel, resolveStageModelString } from '@/lib/server/resolve-model';
-import { searchWithTavily, formatSearchResultsAsContext } from '@/lib/web-search/tavily';
+import { searchWithTavily, formatSearchResultsAsContext as formatTavilyResults } from '@/lib/web-search/tavily';
+import { searchWithDuckDuckGo, formatSearchResultsAsContext as formatDuckDuckGoResults } from '@/lib/web-search/duckduckgo';
 import { persistClassroom } from '@/lib/server/classroom-storage';
 import { isGenerationDebugEnabled } from '@/lib/server/generation-debug';
 import {
@@ -28,6 +29,7 @@ import {
   generateTTSForClassroom,
 } from '@/lib/server/classroom-media-generation';
 import type { UserRequirements } from '@/lib/types/generation';
+import type { WebSearchProviderId } from '@/lib/web-search/types';
 import type { Scene, Stage } from '@/lib/types/stage';
 
 const log = createLogger('Classroom');
@@ -37,6 +39,8 @@ export interface GenerateClassroomInput {
   pdfContent?: { text: string; images: string[] };
   language?: string;
   enableWebSearch?: boolean;
+  webSearchProviderId?: string; // 'duckduckgo' or 'tavily'
+  webSearchApiKey?: string; // For Tavily (DuckDuckGo doesn't need a key)
   enableImageGeneration?: boolean;
   enableVideoGeneration?: boolean;
   enableTTS?: boolean;
@@ -281,20 +285,42 @@ export async function generateClassroom(
   // Web search (optional, graceful degradation)
   let researchContext: string | undefined;
   if (input.enableWebSearch) {
-    const tavilyKey = resolveWebSearchApiKey();
-    if (tavilyKey) {
-      try {
-        log.info('Running web search for requirement context...');
-        const searchResult = await searchWithTavily({ query: requirement, apiKey: tavilyKey });
-        researchContext = formatSearchResultsAsContext(searchResult);
-        if (researchContext) {
-          log.info(`Web search returned ${searchResult.sources.length} sources`);
+    try {
+      // Determine which provider to use
+      const providerId = (input.webSearchProviderId || 'duckduckgo') as WebSearchProviderId;
+      let searchResult;
+      let formatResults;
+
+      log.info(`[WebSearch] Using provider: ${providerId}`);
+
+      if (providerId === 'tavily') {
+        // Tavily requires API key
+        const tavilyKey = input.webSearchApiKey || resolveWebSearchApiKey();
+        if (!tavilyKey) {
+          log.warn('[WebSearch] Tavily selected but no API key configured, skipping web search');
+        } else {
+          log.info(`[Tavily] Searching: "${requirement.substring(0, 50)}..."`);
+          searchResult = await searchWithTavily({ query: requirement, apiKey: tavilyKey });
+          formatResults = formatTavilyResults;
+          researchContext = formatResults(searchResult);
+          if (researchContext) {
+            log.info(`[Tavily] Found ${searchResult.sources.length} sources in ${searchResult.responseTime}ms`);
+          }
         }
-      } catch (e) {
-        log.warn('Web search failed, continuing without search context:', e);
+      } else if (providerId === 'duckduckgo') {
+        // DuckDuckGo is free and requires no API key
+        log.info(`[DuckDuckGo] Searching: "${requirement.substring(0, 50)}..."`);
+        searchResult = await searchWithDuckDuckGo({ query: requirement });
+        formatResults = formatDuckDuckGoResults;
+        researchContext = formatResults(searchResult);
+        if (researchContext) {
+          log.info(`[DuckDuckGo] Found ${searchResult.sources.length} sources in ${searchResult.responseTime}ms`);
+        }
+      } else {
+        log.warn(`[WebSearch] Unknown provider: ${providerId}, skipping web search`);
       }
-    } else {
-      log.warn('enableWebSearch is true but no Tavily API key configured, skipping web search');
+    } catch (e) {
+      log.warn('Web search failed, continuing without search context:', e);
     }
   }
 

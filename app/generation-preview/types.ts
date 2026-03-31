@@ -22,6 +22,9 @@ export interface GenerationSessionState {
   pdfFileName?: string;
   pdfProviderId?: string;
   pdfProviderConfig?: { apiKey?: string; baseUrl?: string };
+  // Web search settings
+  webSearchProviderId?: string; // 'duckduckgo' or 'tavily'
+  webSearchApiKey?: string; // For Tavily (DuckDuckGo doesn't need a key)
   // Web search context
   researchContext?: string;
   researchSources?: Array<{ title: string; url: string }>;

@@ -805,18 +805,26 @@ async function generateQuizContent(
 
   const prompts = generationOptions?.compactJsonPrompt
     ? {
-        system: `You are a JSON quiz generator.
-Rules:
-- Output ONLY valid JSON array.
-- No markdown, no explanations, no extra text.
-- Return at least 1 question object.`,
+        system: `You are a JSON quiz generator. Output ONLY valid JSON array. No markdown, no explanations, no extra text.
+
+CRITICAL RULES:
+1. Each question MUST have exactly 4 options as strings
+2. Each question MUST have type: "single" or "multiple"
+3. correctAnswer MUST be ONE of the option texts exactly (or array for multiple)
+4. NO short_answer type - use single/multiple only
+5. Return at least 1 complete question
+
+Example format:
+[{"id":"q1","type":"single","question":"What is X?","options":["Option A","Option B","Option C","Option D"],"correctAnswer":"Option B","points":1}]`,
         user: `Generate ${quizConfig.questionCount} quiz questions.
 Title: ${outline.title}
 Description: ${outline.description}
 Key points:
 ${(outline.keyPoints || []).map((p, i) => `${i + 1}. ${p}`).join('\n')}
 Difficulty: ${quizConfig.difficulty}
-Question types: ${quizConfig.questionTypes.join(', ')}`,
+Question types: ${quizConfig.questionTypes.includes('multiple') ? 'multiple choice (select multiple answers)' : 'single choice (select one answer)'}
+
+MUST produce ONLY valid JSON array with NO other text:`,
       }
     : buildPrompt(PROMPT_IDS.QUIZ_CONTENT, {
         title: outline.title,
@@ -914,29 +922,81 @@ Question types: ${quizConfig.questionTypes.join(', ')}`,
  * Normalize quiz options from AI response.
  * AI may generate plain strings ["OptionA", "OptionB"] or QuizOption objects.
  * This normalizes to QuizOption[] format: { value: "A", label: "OptionA" }
+ * Ensures exactly 4 options (pads with defaults if fewer provided)
  */
 function normalizeQuizOptions(
-  options: unknown[] | undefined,
+  options: unknown,
 ): { value: string; label: string }[] | undefined {
-  if (!options || !Array.isArray(options)) return undefined;
+  if (!options) return undefined;
 
-  return options.map((opt, index) => {
+  let optionsArray: unknown[] = [];
+  if (Array.isArray(options)) {
+    optionsArray = options;
+  } else if (typeof options === 'object' && options !== null) {
+    // Handle cases where LLM returns { "A": "...", "B": "..." } instead of array
+    const obj = options as Record<string, unknown>;
+    // If it has A, B, C, D keys, sort them and extract values
+    const keys = Object.keys(obj).sort();
+    if (keys.some((k) => ['A', 'B', 'C', 'D', 'a', 'b', 'c', 'd'].includes(k))) {
+      optionsArray = keys.map((k) => obj[k]);
+    } else {
+      optionsArray = Object.values(obj);
+    }
+  } else {
+    return undefined;
+  }
+
+  if (optionsArray.length === 0) return undefined;
+
+  // Limit to 4 options max (standard quiz format)
+  const limitedOptions = optionsArray.slice(0, 4);
+
+  const normalized = limitedOptions.map((opt, index) => {
     const letter = String.fromCharCode(65 + index); // A, B, C, D...
 
     if (typeof opt === 'string') {
-      return { value: letter, label: opt };
+      const cleanText = opt.trim().replace(/^([A-D]|[1-4])[\.\)\:]\s*/i, '');
+      return { value: letter, label: cleanText || `Option ${letter}` };
     }
 
     if (typeof opt === 'object' && opt !== null) {
       const obj = opt as Record<string, unknown>;
+      
+      let textStr = '';
+      if (typeof obj.label === 'string') textStr = obj.label;
+      else if (typeof obj.text === 'string') textStr = obj.text;
+      else if (typeof obj.content === 'string') textStr = obj.content;
+      else if (typeof obj.value === 'string' && obj.value.length > 1) textStr = obj.value;
+      else if (typeof obj.description === 'string') textStr = obj.description;
+      else if (typeof obj.name === 'string') textStr = obj.name;
+
+      const cleanText = textStr.trim().replace(/^([A-D]|[1-4])[\.\)\:]\s*/i, '');
+
+      let explicitValue = letter;
+      if (typeof obj.value === 'string' && /^[A-D]$/i.test(obj.value.trim())) {
+        explicitValue = obj.value.trim().toUpperCase();
+      } else if (typeof obj.id === 'string' && /^[A-D]$/i.test(obj.id.trim())) {
+        explicitValue = obj.id.trim().toUpperCase();
+      } else if (typeof obj.key === 'string' && /^[A-D]$/i.test(obj.key.trim())) {
+        explicitValue = obj.key.trim().toUpperCase();
+      }
+
       return {
-        value: typeof obj.value === 'string' ? obj.value : letter,
-        label: typeof obj.label === 'string' ? obj.label : String(obj.value || obj.text || letter),
+        value: explicitValue,
+        label: cleanText || `Option ${letter}`,
       };
     }
 
-    return { value: letter, label: String(opt) };
+    return { value: letter, label: `Option ${letter}` };
   });
+
+  // Ensure we have at least 4 options (pad if needed)
+  while (normalized.length < 4) {
+    const letter = String.fromCharCode(65 + normalized.length);
+    normalized.push({ value: letter, label: `Option ${letter}` });
+  }
+
+  return normalized;
 }
 
 /**
@@ -947,27 +1007,53 @@ function mapAnswerTextToValue(
   answerText: string | undefined,
   options: { value: string; label: string }[] | undefined,
 ): string | undefined {
-  if (!answerText || !options) return undefined;
+  if (!answerText || !options || options.length === 0) return undefined;
 
   const trimmed = answerText.trim();
+  const cleanAnswerText = trimmed.replace(/^([A-D]|[1-4])[\.\)\:]\s*/i, '');
 
   // Direct lookup: if answer text matches an option label exactly
-  const matching = options.find((opt) => opt.label === trimmed);
+  const matching = options.find((opt) => opt.label === trimmed || opt.label === cleanAnswerText);
   if (matching) return matching.value;
 
   // Try case-insensitive match
   const caseInsensitiveMatch = options.find(
-    (opt) => opt.label.toLowerCase() === trimmed.toLowerCase(),
+    (opt) => opt.label.toLowerCase() === trimmed.toLowerCase() || opt.label.toLowerCase() === cleanAnswerText.toLowerCase(),
   );
   if (caseInsensitiveMatch) return caseInsensitiveMatch.value;
 
-  // If answer is already a single letter (A, B, C, D), validate it exists in options
-  if (/^[A-D]$/.test(trimmed)) {
-    if (options.find((opt) => opt.value === trimmed)) {
-      return trimmed;
-    }
+  // Try partial match (remove "Option" prefix if present)
+  const simplifiedAnswer = trimmed.replace(/^option\s*/i, '').trim();
+  if (simplifiedAnswer && /^[A-D]$/i.test(simplifiedAnswer)) {
+    const match = options.find((opt) => opt.value === simplifiedAnswer.toUpperCase());
+    if (match) return match.value;
   }
 
+  // Direct letter check (A, B, C, D)
+  if (/^[A-D]$/i.test(trimmed)) {
+    const match = options.find((opt) => opt.value === trimmed.toUpperCase());
+    if (match) return match.value;
+  }
+
+  // Extract letter prefix from answer text (e.g., "A. Some text" -> "A")
+  const prefixMatch = trimmed.match(/^([A-D])[\.\)\:]/i);
+  if (prefixMatch) {
+    const match = options.find((opt) => opt.value === prefixMatch[1].toUpperCase());
+    if (match) return match.value;
+  }
+
+  // Numeric index (1=A, 2=B, etc.) assuming 1-based index if LLM returned '1', '2' as answers?
+  // Actually, keeping original logic for numIndex
+  const numIndex = parseInt(trimmed, 10);
+  if (!isNaN(numIndex) && numIndex >= 0 && numIndex < options.length) {
+    return options[numIndex].value;
+  }
+
+  // Try to see if any option label is contained within the answer string
+  const substringMatch = options.find((opt) => trimmed.toLowerCase().includes(opt.label.toLowerCase()) && opt.label.length > 2);
+  if (substringMatch) return substringMatch.value;
+
+  // No match found
   return undefined;
 }
 
@@ -981,11 +1067,15 @@ function normalizeQuizAnswer(
   question: Record<string, unknown>,
   normalizedOptions: { value: string; label: string }[] | undefined,
 ): string[] | undefined {
-  // AI might use "correctAnswer", "answer", or "correct_answer"
+  // AI might use "correctAnswer", "answer", "correct_answer", etc.
   const raw =
     question.answer ??
+    question.answers ??
     question.correctAnswer ??
-    (question as Record<string, unknown>).correct_answer;
+    question.correctAnswers ??
+    (question as Record<string, unknown>).correct_answer ??
+    (question as Record<string, unknown>).correct_answers;
+
   if (!raw) return undefined;
 
   const answers: string[] = Array.isArray(raw) ? raw.map(String) : [String(raw)];

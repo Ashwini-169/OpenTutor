@@ -84,65 +84,31 @@ interface SceneGenerationOptions {
  * Canvas: 1000 x 562.5 with 50px margins.
  */
 function getSlideComplexityGuide(pageIndex: number, totalPages: number): string {
-  const isFirst = pageIndex === 1;
   const isLast = pageIndex === totalPages;
-  const isEarly = pageIndex <= 2;
-  const isMiddle = pageIndex >= 3 && pageIndex <= 5;
-
-  if (isFirst) {
-    return `COMPLEXITY: MINIMAL (slide 1 of ${totalPages}). Fast render priority.
-USE THESE EXACT POSITIONS (do NOT change left/top/width/height):
-  title_1:  {"type":"text","id":"title_1","left":60,"top":40,"width":880,"height":76}
-  text_1:   {"type":"text","id":"text_1","left":60,"top":140,"width":880,"height":50}
-  text_2:   {"type":"text","id":"text_2","left":60,"top":200,"width":880,"height":50}
-  text_3:   {"type":"text","id":"text_3","left":60,"top":260,"width":880,"height":50}
-NO shapes, NO cards, NO charts, NO images. Only 2-4 text elements max.`;
-  }
-
-  if (isEarly) {
-    return `COMPLEXITY: LIGHT (slide ${pageIndex} of ${totalPages}).
-USE THESE EXACT POSITIONS (do NOT change left/top/width/height):
-  title_1:    {"type":"text","id":"title_1","left":60,"top":40,"width":880,"height":76}
-  card_bg_1:  {"type":"shape","id":"card_bg_1","left":60,"top":140,"width":400,"height":130,"fill":"#e8f4fd"}
-  card_txt_1: {"type":"text","id":"card_txt_1","left":80,"top":155,"width":360,"height":100}
-  card_bg_2:  {"type":"shape","id":"card_bg_2","left":520,"top":140,"width":400,"height":130,"fill":"#e8f4fd"}
-  card_txt_2: {"type":"text","id":"card_txt_2","left":540,"top":155,"width":360,"height":100}
-  text_1:     {"type":"text","id":"text_1","left":60,"top":300,"width":880,"height":200}
-Max 7 elements. Cards use shape behind text at same position.`;
-  }
-
-  if (isMiddle) {
-    return `COMPLEXITY: MODERATE (slide ${pageIndex} of ${totalPages}).
-USE THESE EXACT POSITIONS (do NOT change left/top/width/height):
-  title_1:    {"type":"text","id":"title_1","left":60,"top":40,"width":880,"height":76}
-  card_bg_1:  {"type":"shape","id":"card_bg_1","left":60,"top":140,"width":420,"height":160,"fill":"#eef4ff"}
-  card_txt_1: {"type":"text","id":"card_txt_1","left":80,"top":155,"width":380,"height":130}
-  card_bg_2:  {"type":"shape","id":"card_bg_2","left":520,"top":140,"width":420,"height":160,"fill":"#fff3e0"}
-  card_txt_2: {"type":"text","id":"card_txt_2","left":540,"top":155,"width":380,"height":130}
-  text_1:     {"type":"text","id":"text_1","left":60,"top":330,"width":880,"height":180}
-Max 8 elements.`;
-  }
 
   if (isLast) {
     return `COMPLEXITY: SUMMARY (last slide, ${pageIndex} of ${totalPages}).
 USE THESE EXACT POSITIONS (do NOT change left/top/width/height):
   title_1:    {"type":"text","id":"title_1","left":60,"top":40,"width":880,"height":76}
-  card_bg_1:  {"type":"shape","id":"card_bg_1","left":60,"top":140,"width":880,"height":130,"fill":"#e8f5e9"}
-  card_txt_1: {"type":"text","id":"card_txt_1","left":80,"top":155,"width":840,"height":100}
-  text_1:     {"type":"text","id":"text_1","left":60,"top":300,"width":880,"height":200}
-Max 6 elements. Clean summary layout.`;
+  card_bg_1:  {"type":"shape","id":"card_bg_1","left":60,"top":140,"width":420,"height":160,"fill":"#e8f5e9"}
+  card_txt_1: {"type":"text","id":"card_txt_1","left":80,"top":155,"width":380,"height":130}
+  card_bg_2:  {"type":"shape","id":"card_bg_2","left":520,"top":140,"width":420,"height":160,"fill":"#e0f2fe"}
+  card_txt_2: {"type":"text","id":"card_txt_2","left":540,"top":155,"width":380,"height":130}
+  text_1:     {"type":"text","id":"text_1","left":60,"top":330,"width":880,"height":180}
+Max 8 elements. Summary layout with key takeaways in cards.`;
   }
 
+  // ALL slides (including page 1) use content-rich layout
   return `COMPLEXITY: RICH (slide ${pageIndex} of ${totalPages}).
 USE THESE EXACT POSITIONS (do NOT change left/top/width/height):
   title_1:    {"type":"text","id":"title_1","left":60,"top":40,"width":880,"height":76}
-  card_bg_1:  {"type":"shape","id":"card_bg_1","left":60,"top":140,"width":420,"height":130,"fill":"#e8f4fd"}
-  card_txt_1: {"type":"text","id":"card_txt_1","left":80,"top":155,"width":380,"height":100}
-  card_bg_2:  {"type":"shape","id":"card_bg_2","left":520,"top":140,"width":420,"height":130,"fill":"#fff3e0"}
-  card_txt_2: {"type":"text","id":"card_txt_2","left":540,"top":155,"width":380,"height":100}
-  card_bg_3:  {"type":"shape","id":"card_bg_3","left":60,"top":300,"width":880,"height":130,"fill":"#fce4ec"}
-  card_txt_3: {"type":"text","id":"card_txt_3","left":80,"top":315,"width":840,"height":100}
-Max 10 elements.`;
+  card_bg_1:  {"type":"shape","id":"card_bg_1","left":60,"top":140,"width":420,"height":160,"fill":"#e8f4fd"}
+  card_txt_1: {"type":"text","id":"card_txt_1","left":80,"top":155,"width":380,"height":130}
+  card_bg_2:  {"type":"shape","id":"card_bg_2","left":520,"top":140,"width":420,"height":160,"fill":"#fff3e0"}
+  card_txt_2: {"type":"text","id":"card_txt_2","left":540,"top":155,"width":380,"height":130}
+  card_bg_3:  {"type":"shape","id":"card_bg_3","left":60,"top":330,"width":880,"height":150,"fill":"#f3e5f5"}
+  card_txt_3: {"type":"text","id":"card_txt_3","left":80,"top":345,"width":840,"height":120}
+Min 8 elements. EVERY slide MUST use cards (shape + text). Fill each card_txt with 3-5 bullet points. Do NOT generate plain text-only slides.`;
 }
 
 function withJsonRetrySuffix(baseUserPrompt: string, attempt: number, strict = true): string {
@@ -652,9 +618,10 @@ async function generateSlideContent(
 STRICT RULES:
 1. Output ONLY valid JSON object. No markdown. No code fences. No explanation.
 2. Return: { "background": {"type":"solid","color":"#ffffff"}, "elements": [...] }
-3. "elements" must have at least 2 items.
+3. "elements" must have at least 8 items — use card patterns (shape + text pairs).
 4. No duplicate "id" values.
 5. Element types allowed: text, shape, line, chart.
+6. NEVER generate a slide with only plain text elements. ALWAYS use shape+text card pairs.
 
 HEADING STYLE (MANDATORY):
 - Title: {"type":"text","id":"title_1","left":60,"top":50,"width":880,"height":76,"content":"<p style=\\"font-size:32px;\\"><strong>TITLE HERE</strong></p>","defaultFontName":"","defaultColor":"#1a237e"}
@@ -1313,7 +1280,14 @@ export async function generateSceneActions(
 
     const isHinglish = outline.language === 'hi-IN';
     const speechLangNote = isHinglish
-      ? 'Speech language: Hinglish — mix Hindi conversation with English technical terms. Example: "Ab hum dekhenge ki variables kaise kaam karte hain. A variable is basically ek named storage location."'
+      ? `Speech language: Hinglish (STRICTLY FOLLOW).
+Rules:
+- ALWAYS generate speech in Hinglish (Hindi + English mix using Roman Hindi, NOT Devanagari).
+- Keep tone casual like natural Indian conversation.
+- NEVER reply fully in English or fully in Hindi.
+- Use words like: "bhai", "samajh", "simple hai", "dekho", "theek hai", "chalte hain".
+- Keep technical terms in English (e.g., "variables", "sorting", "photosynthesis").
+- Example: "Bhai sorting simple hai, matlab data ko arrange karna. Dekho, agar numbers disordered hain toh hum unhe line mein lagate hain. Samajh gaye?"`
       : 'Speech language: English.';
     const courseCtx = buildCourseContext(ctx);
     const complexityGuideActions = ctx ? getSlideComplexityGuide(ctx.pageIndex ?? 1, ctx.totalPages ?? 1) : '';
@@ -1328,29 +1302,28 @@ STRICT RULES:
 2. Two item types allowed:
    - Speech: {"type":"text","content":"Your spoken teaching text here"}
    - Action: {"type":"action","name":"spotlight","params":{"elementId":"element_id_here"}}
-3. MANDATORY: Include AT LEAST 2 speech items ({"type":"text",...}).
+3. MANDATORY: Include 2-3 speech items ({"type":"text",...}). No more than 4.
 4. A slide with zero speech items is INVALID.
-5. Pattern: spotlight action → speech text → next spotlight → speech text → closing speech.
+5. Pattern: spotlight action → speech text → next spotlight → speech text.
+6. KEEP EACH SPEECH SHORT: Maximum 2 sentences per speech item. No long paragraphs.
 
 SPEECH STRUCTURE:
-- ${isFirstSlide ? 'First slide: greet students and introduce the course topic.' : 'NOT the first slide: do NOT greet. Continue naturally from previous topic.'}
-- Explain each key point with detail and examples.
-- End with a brief summary speech.
+- ${isFirstSlide ? 'First slide: greet students briefly and introduce the topic.' : 'NOT the first slide: do NOT greet. Continue naturally from previous topic.'}
+- Briefly mention key points. Do NOT over-explain — the slide content itself is detailed.
+- End with a short 1-sentence summary.
 ${speechLangNote}`,
-          user: `Generate teaching actions for this slide.
+          user: `Generate CONCISE teaching actions for this slide (3-5 items total, each speech max 2 sentences).
 Title: ${outline.title}
 Description: ${outline.description}
 Key points:
 ${(outline.keyPoints || []).map((p, i) => `${i + 1}. ${p}`).join('\n')}
 Slide elements (use these IDs for spotlight actions):
 ${elementsText}
-${courseCtx ? `Course context:
-${courseCtx}` : ''}
-${agentsText ? `Agents:
-${agentsText}` : ''}
+${courseCtx ? `Course context:\n${courseCtx}` : ''}
+${agentsText ? `Agents:\n${agentsText}` : ''}
 ${userProfile ? `User profile: ${userProfile}` : ''}
 
-Output JSON array only. Must have at least 2 speech items:`,
+Output JSON array only. Keep speech SHORT (max 2 sentences each):`,
         }
       : buildPrompt(PROMPT_IDS.SLIDE_ACTIONS, {
           title: outline.title,
@@ -1381,7 +1354,13 @@ Output JSON array only. Must have at least 2 speech items:`,
     const questionsText = formatQuestionsForPrompt(content.questions);
     const isHinglishQuiz = outline.language === 'hi-IN';
     const quizSpeechLang = isHinglishQuiz
-      ? 'Speech language: Hinglish (Hindi + English mix).'
+      ? `Speech language: Hinglish (STRICTLY FOLLOW).
+Rules:
+- ALWAYS generate speech in Hinglish (Hindi + English mix using Roman Hindi, NOT Devanagari).
+- Keep tone casual like natural Indian conversation. NEVER reply fully in English.
+- Use words like: "bhai", "samajh", "simple hai", "dekho", "theek hai".
+- Keep technical terms in English.
+- Example: "Bhai yeh quiz simple hai, dekho dhyaan se socho aur answer karo."`
       : 'Speech language: English.';
 
     const prompts = generationOptions?.compactJsonPrompt
@@ -1434,7 +1413,13 @@ Output JSON array only:`,
     const agentsText = formatAgentsForPrompt(agents);
     const isHinglishInteractive = outline.language === 'hi-IN';
     const interactiveSpeechLang = isHinglishInteractive
-      ? 'Speech language: Hinglish (Hindi + English mix).'
+      ? `Speech language: Hinglish (STRICTLY FOLLOW).
+Rules:
+- ALWAYS generate speech in Hinglish (Hindi + English mix using Roman Hindi, NOT Devanagari).
+- Keep tone casual like natural Indian conversation. NEVER reply fully in English.
+- Use words like: "bhai", "samajh", "simple hai", "dekho", "theek hai".
+- Keep technical terms in English.
+- Example: "Dekho bhai, is interactive page pe experiment karo aur results observe karo."`
       : 'Speech language: English.';
 
     const prompts = generationOptions?.compactJsonPrompt
@@ -1485,7 +1470,13 @@ Output JSON array only:`,
     const agentsText = formatAgentsForPrompt(agents);
     const isHinglishPbl = outline.language === 'hi-IN';
     const pblSpeechLang = isHinglishPbl
-      ? 'Speech language: Hinglish (Hindi + English mix).'
+      ? `Speech language: Hinglish (STRICTLY FOLLOW).
+Rules:
+- ALWAYS generate speech in Hinglish (Hindi + English mix using Roman Hindi, NOT Devanagari).
+- Keep tone casual like natural Indian conversation. NEVER reply fully in English.
+- Use words like: "bhai", "samajh", "simple hai", "dekho", "theek hai".
+- Keep technical terms in English.
+- Example: "Bhai ab hum ek project-based activity karte hain, role choose karo aur shuru ho jao."`
       : 'Speech language: English.';
 
     const prompts = generationOptions?.compactJsonPrompt

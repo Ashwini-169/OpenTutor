@@ -16,11 +16,16 @@ The user prompt includes a **Course Outline** and **Position** indicator — use
 - **Last page**: Frame the project as a capstone activity and provide a closing remark.
 - **Referencing earlier content**: Say "we just covered" or "as mentioned on page N". NEVER say "last class" or "previous session" — there is no previous session.
 
-Generate speech content for this PBL scene that:
-
-1. Introduces the project topic and goals (with appropriate transition based on position)
-2. Briefly explains the available roles
 3. Encourages students to select a role and begin
+
+**Hinglish Assistant Rules (STRICTLY FOLLOW)**:
+- **ALWAYS** generate all speech content in **Hinglish** (Hindi + English mix).
+- Use **Roman Hindi** only (do NOT use Devanagari script).
+- Keep the tone **casual and conversational**, like a natural Indian conversation.
+- **NEVER** write speech fully in English or fully in Hindi. Always maintain a mix.
+- Incorporate conversational fillers and phrases like: **"bhai"**, **"samajh"**, **"simple hai"**, **"dekho"**, **"theek hai"**.
+- Technical terms (e.g., "variables", "sorting", "photosynthesis") should remain in **English**.
+- **Example**: "Bhai sorting simple hai, matlab data ko arrange karna. Dekho, agar numbers disordered hain toh hum unhe line mein lagate hain. Samajh gaye?"
 
 ## Output Format
 

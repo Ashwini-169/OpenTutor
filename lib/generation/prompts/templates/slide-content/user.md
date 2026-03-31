@@ -18,7 +18,12 @@
 
 Based on the scene information above, generate a complete Canvas/PPT component for one page.
 
-**Content Density**: The slide should feel comprehensive and visually rich. DO NOT leave the slide looking sparse, hollow, or overly empty. While keeping text concise (bullet points, short phrases), you MUST provide a sufficient number of details, sub-points, examples, or relevant visual components (shapes, charts, diagrams) to intelligently fill the {{canvas_width}} × {{canvas_height}} px space. A slide with just one title and one short sentence is UNACCEPTABLE.
+**Content Density (CRITICAL)**: The slide must be **highly detailed and information-rich**. A sparse or "clean" slide with minimal text is a failure. You MUST:
+1. Provide **at least 5-8 descriptive bullet points** or detailed sub-concepts.
+2. Use **multiple levels of information hierarchy** (e.g., main points with secondary explanatory sub-points).
+3. Distribute elements across the entire {{canvas_width}} × {{canvas_height}} px canvas to avoid large empty gaps.
+4. If the provided "Key Points" are brief, you MUST **intelligently expand** on them using your knowledge to provide depth, examples, or context.
+5. Aim for a "professional presentation" look—think information-dense cards, diagrams, or multi-column layouts. A slide with only a title and a few short lines is UNACCEPTABLE.
 
 **Language Requirement**: All generated text content must be in the same language as the title and description above.
 
@@ -32,4 +37,5 @@ Based on the scene information above, generate a complete Canvas/PPT component f
 6. All TextElement `height` values must be selected from the quick reference table in the system prompt
 
 **Output Structure Example**:
-{"background":{"type":"solid","color":"#ffffff"},"elements":[{"id":"title_001","type":"text","left":60,"top":50,"width":880,"height":76,"content":"<p style=\"font-size:32px;\"><strong>Title Content</strong></p>","defaultFontName":"","defaultColor":"#333333"},{"id":"content_001","type":"text","left":60,"top":150,"width":880,"height":130,"content":"<p style=\"font-size:18px;\">• Point One</p><p style=\"font-size:18px;\">• Point Two</p><p style=\"font-size:18px;\">• Point Three</p>","defaultFontName":"","defaultColor":"#333333"}]}
+{"background":{"type":"solid","color":"#f8fafc"},"elements":[{"id":"title_001","type":"text","left":60,"top":50,"width":880,"height":76,"content":"<p style=\"font-size:32px; text-align:center;\"><strong>Topic Title</strong></p>","defaultFontName":"","defaultColor":"#1e293b"},{"id":"card_1_bg","type":"shape","left":60,"top":150,"width":430,"height":200,"path":"M 0 0 L 1 0 L 1 1 L 0 1 Z","viewBox":[1,1],"fill":"#ffffff","fixedRatio":false},{"id":"card_1_text","type":"text","left":80,"top":170,"width":390,"height":160,"content":"<p style=\"font-size:20px;\"><strong>Concept A</strong></p><p style=\"font-size:16px;\">• Detail 1: Important fact</p><p style=\"font-size:16px;\">• Detail 2: Another fact</p><p style=\"font-size:16px;\">• Example: Practical use case</p>","defaultFontName":"","defaultColor":"#334155"},{"id":"card_2_bg","type":"shape","left":510,"top":150,"width":430,"height":200,"path":"M 0 0 L 1 0 L 1 1 L 0 1 Z","viewBox":[1,1],"fill":"#ffffff","fixedRatio":false},{"id":"card_2_text","type":"text","left":530,"top":170,"width":390,"height":160,"content":"<p style=\"font-size:20px;\"><strong>Concept B</strong></p><p style=\"font-size:16px;\">• Logic 1: Key rule</p><p style=\"font-size:16px;\">• Logic 2: Secondary rule</p><p style=\"font-size:16px;\">• Note: Critical takeaway</p>","defaultFontName":"","defaultColor":"#334155"},{"id":"footer_sep","type":"shape","left":60,"top":480,"width":880,"height":2,"path":"M 0 0 L 1 0 L 1 1 L 0 1 Z","viewBox":[1,1],"fill":"#e2e8f0","fixedRatio":false}]}
+

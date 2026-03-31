@@ -65,10 +65,17 @@ export async function POST(req: NextRequest) {
         .filter(Boolean),
     );
 
-    const orderedNames =
-      PREFERRED_OLLAMA_MODELS.filter((name) => detected.has(name)).length > 0
-        ? PREFERRED_OLLAMA_MODELS.filter((name) => detected.has(name))
-        : Array.from(detected);
+    const envPreferred = (process.env.OLLAMA_MODELS || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const combinedPreferred = [...new Set([...envPreferred, ...PREFERRED_OLLAMA_MODELS])];
+
+    const detectedSet = new Set(detected);
+    const orderedPreferred = combinedPreferred.filter((name) => detectedSet.has(name));
+    const others = Array.from(detected).filter((name) => !combinedPreferred.includes(name));
+
+    const orderedNames = [...orderedPreferred, ...others];
 
     const models = orderedNames.map((name) => ({
         id: name,

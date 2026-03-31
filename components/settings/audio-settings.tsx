@@ -710,21 +710,52 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                         const localeNameA = voiceA?.LocaleName || a;
                         const localeNameB = voiceB?.LocaleName || b;
 
-                        // Check if LocaleName contains "Chinese" (case-insensitive)
-                        const aIsChinese = /chinese/i.test(localeNameA);
-                        const bIsChinese = /chinese/i.test(localeNameB);
+                        // Priority 1: Indian Locales
+                        const indianPriority = [
+                          'hi-IN', // Hindi (India)
+                          'en-IN', // English (India)
+                          'bn-IN', // Bengali (India)
+                          'gu-IN', // Gujarati (India)
+                          'kn-IN', // Kannada (India)
+                          'ml-IN', // Malayalam (India)
+                          'mr-IN', // Marathi (India)
+                          'or-IN', // Odia (India)
+                          'pa-IN', // Punjabi (India)
+                          'ta-IN', // Tamil (India)
+                          'te-IN', // Telugu (India)
+                          'ur-IN', // Urdu (India)
+                        ];
 
-                        // Both are Chinese - sort by priority
+                        const aIndianIndex = indianPriority.indexOf(a);
+                        const bIndianIndex = indianPriority.indexOf(b);
+
+                        if (aIndianIndex !== -1 && bIndianIndex !== -1) return aIndianIndex - bIndianIndex;
+                        if (aIndianIndex !== -1) return -1;
+                        if (bIndianIndex !== -1) return 1;
+
+                        // Priority 2: Other Major English variants
+                        const englishPriority = ['en-US', 'en-GB', 'en-AU', 'en-CA'];
+                        const aEnglishIndex = englishPriority.indexOf(a);
+                        const bEnglishIndex = englishPriority.indexOf(b);
+
+                        if (aEnglishIndex !== -1 && bEnglishIndex !== -1) return aEnglishIndex - bEnglishIndex;
+                        if (aEnglishIndex !== -1) return -1;
+                        if (bEnglishIndex !== -1) return 1;
+
+                        // Priority 3: Chinese Locales (Corrected from mangled hi-IN)
+                        const aIsChinese = /chinese|mandarin|cantonese/i.test(localeNameA);
+                        const bIsChinese = /chinese|mandarin|cantonese/i.test(localeNameB);
+
                         if (aIsChinese && bIsChinese) {
                           const chinesePriority = [
-                            'hi-IN', // Chinese (Simplified, China)
-                            'hi-IN-liaoning', // Chinese (Northeastern Mandarin, Liaoning)
-                            'hi-IN-shaanxi', // Chinese (Shaanxi dialect)
+                            'zh-CN', // Chinese (Simplified, China)
+                            'zh-CN-liaoning', // Chinese (Northeastern Mandarin)
+                            'zh-CN-shaanxi', // Chinese (Shaanxi dialect)
                             'wuu-CN', // Chinese (Wu, China)
                             'zh-HK', // Chinese (Cantonese, Hong Kong)
                             'yue-CN', // Chinese (Cantonese, China)
-                            'hi-IN-shandong', // Chinese (Jinan dialect, Shandong)
-                            'hi-IN-sichuan', // Chinese (Sichuan dialect)
+                            'zh-CN-shandong', // Chinese (Jinan dialect)
+                            'zh-CN-sichuan', // Chinese (Sichuan dialect)
                             'zh-TW', // Chinese (Taiwanese Mandarin)
                           ];
                           const aIndex = chinesePriority.indexOf(a);
@@ -736,15 +767,11 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                           return localeNameA.localeCompare(localeNameB);
                         }
 
-                        // Only a is Chinese
                         if (aIsChinese) return -1;
-                        // Only b is Chinese
                         if (bIsChinese) return 1;
 
-                        // Neither is Chinese - sort by priority for other major languages
+                        // Priority 4: Other major global languages
                         const otherPriority = [
-                          'en-US',
-                          'en-GB',
                           'ja-JP',
                           'ko-KR',
                           'es-ES',

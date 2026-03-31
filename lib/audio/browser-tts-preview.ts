@@ -4,6 +4,7 @@ import type { TTSVoiceInfo } from './types';
 
 const VOICES_LOAD_TIMEOUT_MS = 2000;
 const PREVIEW_TIMEOUT_MS = 30000;
+const HINDI_LANG_THRESHOLD = 0.1;
 const CJK_LANG_THRESHOLD = 0.3;
 const FEMALE_VOICE_HINTS =
   /female|woman|girl|aria|jenny|zira|hazel|samantha|victoria|ava|lisa|xiaoxiao|xiaoyi|sunny|serena|nova|shimmer/i;
@@ -22,13 +23,23 @@ function createAbortError(): Error {
 }
 
 function inferPreviewLang(text: string): string {
+  // Detect Hindi characters (Devanagari range: \u0900-\u097f)
+  const hindiCount = (text.match(/[\u0900-\u097f]/g) || []).length;
+  if (hindiCount / text.length > HINDI_LANG_THRESHOLD) return 'hi-IN';
+
+  // Detect CJK characters
   const cjkCount = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
   const ratio = text.length > 0 ? cjkCount / text.length : 0;
-  return ratio > CJK_LANG_THRESHOLD ? 'hi-IN' : 'en-US';
+  return ratio > CJK_LANG_THRESHOLD ? 'zh-CN' : 'en-US';
 }
 
 export function isBrowserTTSAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError';
+}
+
+function getGenderLabel(gender: TTSVoiceInfo['gender'], locale: string): string {
+  if (!gender || gender === 'neutral') return '';
+  return gender === 'female' ? '(Female)' : '(Male)';
 }
 
 function inferVoiceGender(name: string): 'male' | 'female' | 'neutral' {

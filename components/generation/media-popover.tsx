@@ -81,7 +81,6 @@ function getVoiceDisplayName(name: string, lang: string): string {
 
 function getGenderLabel(gender: TTSVoiceInfo['gender'], locale: string): string {
   if (!gender || gender === 'neutral') return '';
-  if (locale.startsWith('zh')) return gender === 'female' ? '（女）' : '（男）';
   return gender === 'female' ? '(Female)' : '(Male)';
 }
 

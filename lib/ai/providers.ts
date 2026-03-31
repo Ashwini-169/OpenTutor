@@ -16,8 +16,8 @@
  * - https://platform.moonshot.cn/docs/pricing/chat
  * - https://platform.minimaxi.com/docs/guides/text-generation
  * - https://platform.minimax.io/docs/api-reference/text-anthropic-api
- * - https://docs.bigmodel.cn/cn/guide/start/model-overview
- * - https://help.aliyun.com/zh/model-studio/models (Qwen/DashScope)
+ * - https://docs.bigmodel.cn/en/guide/start/model-overview
+ * - https://help.aliyun.com/model-studio/models (Qwen/DashScope)
  * - https://siliconflow.cn/models
  * - https://siliconflow.cn/pricing
  * - https://www.volcengine.com/docs/82379/1330310
@@ -791,7 +791,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
 
   siliconflow: {
     id: 'siliconflow',
-    name: '硅基流动',
+    name: 'SiliconFlow',
     type: 'openai',
     defaultBaseUrl: 'https://api.siliconflow.cn/v1',
     requiresApiKey: true,
@@ -891,7 +891,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
 
   doubao: {
     id: 'doubao',
-    name: '豆包',
+    name: 'Doubao',
     type: 'openai',
     defaultBaseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
     requiresApiKey: true,

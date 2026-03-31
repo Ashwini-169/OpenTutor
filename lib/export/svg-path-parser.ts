@@ -15,8 +15,8 @@ const typeMap = {
 };
 
 /**
- * 简单解析SVG路径
- * @param d SVG path d属性
+ * Simple parsing of SVG paths
+ * @param d SVG path d attribute
  */
 export const parseSvgPath = (d: string) => {
   const pathData = new SVGPathData(d);
@@ -30,8 +30,8 @@ export const parseSvgPath = (d: string) => {
 export type SvgPath = ReturnType<typeof parseSvgPath>;
 
 /**
- * 解析SVG路径，并将圆弧（A）类型的路径转为三次贝塞尔（C）类型的路径
- * @param d SVG path d属性
+ * Parse SVG path and convert arc (A) types to cubic Bézier (C) types
+ * @param d SVG path d attribute
  */
 export const toPoints = (d: string) => {
   const pathData = new SVGPathData(d);

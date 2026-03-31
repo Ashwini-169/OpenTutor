@@ -198,6 +198,32 @@ export function useChatSessions(options: UseChatSessionsOptions = {}) {
             revealedText: string,
             _isComplete: boolean,
           ) {
+            // Trigger TTS for discussion/QA when a text chunk finishes revealing
+            if (_isComplete && type !== 'lecture') {
+              const settings = useSettingsStore.getState();
+              if (
+                settings.ttsEnabled &&
+                !settings.ttsMuted &&
+                typeof window !== 'undefined' &&
+                window.speechSynthesis
+              ) {
+                // Cancel previous utterance so fast turns don't overlap wildly
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(revealedText);
+                utterance.rate = settings.ttsSpeed || 1;
+                utterance.volume = settings.ttsVolume ?? 1;
+                
+                // Attempt language auto-detection similar to lecture fallback
+                const cjkRatio =
+                  (revealedText.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length /
+                  (revealedText.length || 1);
+                utterance.lang = cjkRatio > 0.3 ? 'hi-IN' : 'en-US';
+                
+                window.speechSynthesis.speak(utterance);
+              }
+            }
+
             setSessions((prev) =>
               prev.map((s) => {
                 if (s.id !== sessionId) return s;

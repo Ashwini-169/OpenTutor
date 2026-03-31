@@ -18,6 +18,8 @@
 
 Based on the scene information above, generate a complete Canvas/PPT component for one page.
 
+**Content Density**: The slide should feel comprehensive and visually rich. DO NOT leave the slide looking sparse, hollow, or overly empty. While keeping text concise (bullet points, short phrases), you MUST provide a sufficient number of details, sub-points, examples, or relevant visual components (shapes, charts, diagrams) to intelligently fill the {{canvas_width}} × {{canvas_height}} px space. A slide with just one title and one short sentence is UNACCEPTABLE.
+
 **Language Requirement**: All generated text content must be in the same language as the title and description above.
 
 **Must Follow**:

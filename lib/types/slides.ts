@@ -35,13 +35,13 @@ export const enum ElementTypes {
 }
 
 /**
- * 渐变
+ * ग्रैडिएंट (Gradient)
  *
- * type: 渐变类型（径向、线性）
+ * type: ग्रैडिएंट प्रकार: रेडियल या लीनियर (Gradient type: radial, linear)
  *
- * colors: 渐变颜色列表（pos: 百分比位置；color: 颜色）
+ * colors: ग्रैडिएंट रंगों की सूची: प्रतिशत स्थिति और रंग (Gradient colors list: position and color)
  *
- * rotate: 渐变角度（线性渐变）
+ * rotate: ग्रैडिएंट रोटेशन: लीनियर ग्रैडिएंट के लिए (Gradient rotation: for linear gradient)
  */
 export type GradientType = 'linear' | 'radial';
 export type GradientColor = {
@@ -57,15 +57,15 @@ export interface Gradient {
 export type LineStyleType = 'solid' | 'dashed' | 'dotted';
 
 /**
- * 元素阴影
+ * एलिमेंट शैडो (Element Shadow)
  *
- * h: 水平偏移量
+ * h: क्षैतिज ऑफ़सेट (Horizontal offset)
  *
- * v: 垂直偏移量
+ * v: लंबवत ऑफ़सेट (Vertical offset)
  *
- * blur: 模糊程度
+ * blur: ब्लर डिग्री (Blur degree)
  *
- * color: 阴影颜色
+ * color: शैडो कलर (Shadow color)
  */
 export interface PPTElementShadow {
   h: number;
@@ -75,13 +75,13 @@ export interface PPTElementShadow {
 }
 
 /**
- * 元素边框
+ * एलिमेंट आउटलाइन (Element Outline)
  *
- * style?: 边框样式（实线或虚线）
+ * style?: आउटलाइन स्टाइल: सॉलिड या डैश्ड (Outline style: solid or dashed)
  *
- * width?: 边框宽度
+ * width?: आउटलाइन विड्थ (Outline width)
  *
- * color?: 边框颜色
+ * color?: आउटलाइन कलर (Outline color)
  */
 export interface PPTElementOutline {
   style?: LineStyleType;
@@ -92,11 +92,11 @@ export interface PPTElementOutline {
 export type ElementLinkType = 'web' | 'slide';
 
 /**
- * 元素超链接
+ * एलिमेंट हाइपरलिंक (Element Hyperlink)
  *
- * type: 链接类型（网页、幻灯片页面）
+ * type: लिंक प्रकार: वेब या स्लाइड (Link type: web or slide)
  *
- * target: 目标地址（网页链接、幻灯片页面ID）
+ * target: लक्ष्य पता: वेब लिंक या स्लाइड आईडी (Target address: web link or slide ID)
  */
 export interface PPTElementLink {
   type: ElementLinkType;
@@ -104,27 +104,27 @@ export interface PPTElementLink {
 }
 
 /**
- * 元素通用属性
+ * सामान्य एलिमेंट गुण (General Element Properties)
  *
- * id: 元素ID
+ * id: एलिमेंट आईडी (Element ID)
  *
- * left: 元素水平方向位置（距离画布左侧）
+ * left: क्षैतिज स्थिति: कैनवस के बाईं ओर से (Horizontal position from canvas left)
  *
- * top: 元素垂直方向位置（距离画布顶部）
+ * top: लंबवत स्थिति: कैनवस के ऊपर से (Vertical position from canvas top)
  *
- * lock?: 锁定元素
+ * lock?: एलिमेंट लॉक करें (Lock element)
  *
- * groupId?: 组合ID（拥有相同组合ID的元素即为同一组合元素成员）
+ * groupId?: ग्रुप आईडी: एक ही ग्रुप के सदस्यों के लिए (Group ID: for elements in the same group)
  *
- * width: 元素宽度
+ * width: एलिमेंट की चौड़ाई (Element width)
  *
- * height: 元素高度
+ * height: एलिमेंट की ऊंचाई (Element height)
  *
- * rotate: 旋转角度
+ * rotate: रोटेशन एंगल (Rotation angle)
  *
- * link?: 超链接
+ * link?: हाइपरलिंक (Hyperlink)
  *
- * name?: 元素名
+ * name?: एलिमेंट का नाम (Element name)
  */
 interface PPTBaseElement {
   id: string;
@@ -152,33 +152,33 @@ export type TextType =
   | 'itemNumber';
 
 /**
- * 文本元素
+ * टेक्स्ट एलिमेंट (Text Element)
  *
- * type: 元素类型（text）
+ * type: एलिमेंट प्रकार (Element type: text)
  *
- * content: 文本内容（HTML字符串）
+ * content: टेक्स्ट कंटेंट: HTML स्ट्रिंग (Text content: HTML string)
  *
- * defaultFontName: 默认字体（会被文本内容中的HTML内联样式覆盖）
+ * defaultFontName: डिफ़ॉल्ट फ़ॉन्ट: इनलाइन स्टाइल द्वारा बदला जा सकता है (Default font: can be overridden by inline styles)
  *
- * defaultColor: 默认颜色（会被文本内容中的HTML内联样式覆盖）
+ * defaultColor: डिफ़ॉल्ट रंग: इनलाइन स्टाइल द्वारा बदला जा सकता है (Default color: can be overridden by inline styles)
  *
- * outline?: 边框
+ * outline?: आउटलाइन (Outline)
  *
- * fill?: 填充色
+ * fill?: फिल कलर (Fill color)
  *
- * lineHeight?: 行高（倍），默认1.5
+ * lineHeight?: लाइन हाइट: डिफ़ॉल्ट 1.5 (Line height: default 1.5)
  *
- * wordSpace?: 字间距，默认0
+ * wordSpace?: वर्ड स्पेसिंग: डिफ़ॉल्ट 0 (Word spacing: default 0)
  *
- * opacity?: 不透明度，默认1
+ * opacity?: ओपेसिटी: डिफ़ॉल्ट 1 (Opacity: default 1)
  *
- * shadow?: 阴影
+ * shadow?: शैडो (Shadow)
  *
- * paragraphSpace?: 段间距，默认 5px
+ * paragraphSpace?: पैराग्राफ स्पेसिंग: डिफ़ॉल्ट 5px (Paragraph spacing: default 5px)
  *
- * vertical?: 竖向文本
+ * vertical?: वर्टिकल टेक्स्ट (Vertical text)
  *
- * textType?: 文本类型
+ * textType?: टेक्स्ट प्रकार (Text type)
  */
 export interface PPTTextElement extends PPTBaseElement {
   type: 'text';
@@ -197,11 +197,11 @@ export interface PPTTextElement extends PPTBaseElement {
 }
 
 /**
- * 图片翻转、形状翻转
+ * इमेज और शेप फ्लिप (Image and Shape Flip)
  *
- * flipH?: 水平翻转
+ * flipH?: क्षैतिज फ्लिप (Horizontal flip)
  *
- * flipV?: 垂直翻转
+ * flipV?: लंबवत फ्लिप (Vertical flip)
  */
 export interface ImageOrShapeFlip {
   flipH?: boolean;
@@ -209,23 +209,23 @@ export interface ImageOrShapeFlip {
 }
 
 /**
- * 图片滤镜
+ * इमेज फ़िल्टर (Image Filter)
  *
  * https://developer.mozilla.org/hi-IN/docs/Web/CSS/filter
  *
- * 'blur'?: 模糊，默认0（px）
+ * 'blur'?: ब्लर (Blur), डिफ़ॉल्ट (Default) 0 (px)
  *
- * 'brightness'?: 亮度，默认100（%）
+ * 'brightness'?: ब्राइटनेस (Brightness), डिफ़ॉल्ट (Default) 100 (%)
  *
- * 'contrast'?: 对比度，默认100（%）
+ * 'contrast'?: कंट्रास्ट (Contrast), डिफ़ॉल्ट (Default) 100 (%)
  *
- * 'grayscale'?: 灰度，默认0（%）
+ * 'grayscale'?: ग्रेस्केल (Grayscale), डिफ़ॉल्ट (Default) 0 (%)
  *
- * 'saturate'?: 饱和度，默认100（%）
+ * 'saturate'?: सैचुरेशन (Saturation), डिफ़ॉल्ट (Default) 100 (%)
  *
- * 'hue-rotate'?: 色相旋转，默认0（deg）
+ * 'hue-rotate'?: ह्यू रोटेट (Hue Rotate), डिफ़ॉल्ट (Default) 0 (deg)
  *
- * 'opacity'?: 不透明度，默认100（%）
+ * 'opacity'?: ओपेसिटी (Opacity), डिफ़ॉल्ट (Default) 100 (%)
  */
 export type ImageElementFilterKeys =
   | 'blur'
@@ -252,11 +252,11 @@ export interface ImageElementFilters {
 export type ImageClipDataRange = [[number, number], [number, number]];
 
 /**
- * 图片裁剪
+ * इमेज क्रॉपिंग (Image Cropping)
  *
- * range: 裁剪范围，例如：[[10, 10], [90, 90]] 表示裁取原图从左上角 10%, 10% 到 90%, 90% 的范围
+ * range: क्रॉप रेंज: जैसे [[10, 10], [90, 90]] (Crop range: e.g., [[10, 10], [90, 90]])
  *
- * shape: 裁剪形状，见 configs/image-clip.ts CLIPPATHS
+ * shape: क्रॉप शेप: configs/image-clip.ts देखें (Crop shape: see configs/image-clip.ts)
  */
 export interface ImageElementClip {
   range: ImageClipDataRange;
@@ -266,31 +266,31 @@ export interface ImageElementClip {
 export type ImageType = 'pageFigure' | 'itemFigure' | 'background';
 
 /**
- * 图片元素
+ * इमेज एलिमेंट (Image Element)
  *
- * type: 元素类型（image）
+ * type: एलिमेंट प्रकार (Element type: image)
  *
- * fixedRatio: 固定图片宽高比例
+ * fixedRatio: आस्पेक्ट रेशियो फिक्स रखें (Fixed aspect ratio)
  *
- * src: 图片地址
+ * src: इमेज एड्रेस (Image address)
  *
- * outline?: 边框
+ * outline?: आउटलाइन (Outline)
  *
- * filters?: 图片滤镜
+ * filters?: इमेज फ़िल्टर (Image filters)
  *
- * clip?: 裁剪信息
+ * clip?: क्रॉप जानकारी (Crop info)
  *
- * flipH?: 水平翻转
+ * flipH?: क्षैतिज फ्लिप (Horizontal flip)
  *
- * flipV?: 垂直翻转
+ * flipV?: लंबवत फ्लिप (Vertical flip)
  *
- * shadow?: 阴影
+ * shadow?: शैडो (Shadow)
  *
- * radius?: 圆角半径
+ * radius?: कॉर्नर रेडियस (Corner radius)
  *
- * colorMask?: 颜色蒙版
+ * colorMask?: कलर मास्क (Color mask)
  *
- * imageType?: 图片类型
+ * imageType?: इमेज प्रकार (Image type)
  */
 export interface PPTImageElement extends PPTBaseElement {
   type: 'image';
@@ -310,23 +310,23 @@ export interface PPTImageElement extends PPTBaseElement {
 export type ShapeTextAlign = 'top' | 'middle' | 'bottom';
 
 /**
- * 形状内文本
+ * शेप के अंदर टेक्स्ट (Text inside Shape)
  *
- * content: 文本内容（HTML字符串）
+ * content: टेक्स्ट कंटेंट: HTML स्ट्रिंग (Text content: HTML string)
  *
- * defaultFontName: 默认字体（会被文本内容中的HTML内联样式覆盖）
+ * defaultFontName: डिफ़ॉल्ट फ़ॉन्ट (Default font)
  *
- * defaultColor: 默认颜色（会被文本内容中的HTML内联样式覆盖）
+ * defaultColor: डिफ़ॉल्ट रंग (Default color)
  *
- * align: 文本对齐方向（垂直方向）
+ * align: टेक्स्ट अलाइनमेंट: वर्टिकल (Text alignment: vertical)
  *
- * lineHeight?: 行高（倍），默认1.5
+ * lineHeight?: लाइन हाइट: डिफ़ॉल्ट 1.5 (Line height: default 1.5)
  *
- * wordSpace?: 字间距，默认0
+ * wordSpace?: वर्ड स्पेसिंग: डिफ़ॉल्ट 0 (Word spacing: default 0)
  *
- * paragraphSpace?: 段间距，默认 5px
+ * paragraphSpace?: पैराग्राफ स्पेसिंग: डिफ़ॉल्ट 5px (Paragraph spacing: default 5px)
  *
- * type: 文本类型
+ * type: टेक्स्ट प्रकार (Text type)
  */
 export interface ShapeText {
   content: string;
@@ -340,41 +340,41 @@ export interface ShapeText {
 }
 
 /**
- * 形状元素
+ * शेप एलिमेंट (Shape Element)
  *
- * type: 元素类型（shape）
+ * type: एलिमेंट प्रकार (Element type: shape)
  *
- * viewBox: SVG的viewBox属性，例如 [1000, 1000] 表示 '0 0 1000 1000'
+ * viewBox: SVG viewBox गुण (SVG viewBox property, e.g., [1000, 1000])
  *
- * path: 形状路径，SVG path 的 d 属性
+ * path: शेप पाथ: SVG d गुण (Shape path: SVG path d property)
  *
- * fixedRatio: 固定形状宽高比例
+ * fixedRatio: आस्पेक्ट रेशियो फिक्स रखें (Fixed aspect ratio)
  *
- * fill: 填充，不存在渐变时生效
+ * fill: फिल: ग्रैडिएंट न होने पर प्रभावी (Fill: effective when gradient is absent)
  *
- * gradient?: 渐变，该属性存在时将优先作为填充
+ * gradient?: ग्रैडिएंट (Gradient: takes precedence if exists)
  *
- * pattern?: 图案，该属性存在时将优先作为填充
+ * pattern?: पैटर्न (Pattern: takes precedence if exists)
  *
- * outline?: 边框
+ * outline?: आउटलाइन (Outline)
  *
- * opacity?: 不透明度
+ * opacity?: ओपेसिटी (Opacity)
  *
- * flipH?: 水平翻转
+ * flipH?: क्षैतिज फ्लिप (Horizontal flip)
  *
- * flipV?: 垂直翻转
+ * flipV?: लंबवत फ्लिप (Vertical flip)
  *
- * shadow?: 阴影
+ * shadow?: शैडो (Shadow)
  *
- * special?: 特殊形状（标记一些难以解析的形状，例如路径使用了 L Q C A 以外的类型，该类形状在导出后将变为图片的形式）
+ * special?: विशेष आकार (Special shapes: exported as images if complex)
  *
- * text?: 形状内文本
+ * text?: शेप के अंदर टेक्स्ट (Text inside shape)
  *
- * pathFormula?: 形状路径计算公式
- * 一般情况下，形状的大小变化时仅由宽高基于 viewBox 的缩放比例来调整形状，而 viewBox 本身和 path 不会变化，
- * 但也有一些形状希望能更精确的控制一些关键点的位置，此时就需要提供路径计算公式，通过在缩放时更新 viewBox 并重新计算 path 来重新绘制形状
+ * pathFormula?: पाथ फॉर्म्युला (Shape path formula)
+ * आमतौर पर, शेप स्केल होने पर पाथ नहीं बदलता, लेकिन कुछ शेप्स के लिए पाथ को फिर से कैलकुलेट करने की ज़रूरत होती है।
+ * (In general, paths don't change on scale, but some shapes require path recalculation via formulas.)
  *
- * keypoints?: 关键点位置百分比
+ * keypoints?: मुख्य बिंदुओं की स्थिति (Keypoints position percentage)
  */
 export interface PPTShapeElement extends PPTBaseElement {
   type: 'shape';
@@ -398,29 +398,29 @@ export interface PPTShapeElement extends PPTBaseElement {
 export type LinePoint = '' | 'arrow' | 'dot';
 
 /**
- * 线条元素
+ * लाइन एलिमेंट (Line Element)
  *
- * type: 元素类型（line）
+ * type: एलिमेंट प्रकार (Element type: line)
  *
- * start: 起点位置（[x, y]）
+ * start: स्टार्ट पॉइंट (Start position [x, y])
  *
- * end: 终点位置（[x, y]）
+ * end: एंड पॉइंट (End position [x, y])
  *
- * style: 线条样式（实线、虚线、点线）
+ * style: लाइन स्टाइल: सॉलिड, डैश्ड, डॉटेड (Line style: solid, dashed, dotted)
  *
- * color: 线条颜色
+ * color: लाइन कलर (Line color)
  *
- * points: 端点样式（[起点样式, 终点样式]，可选：无、箭头、圆点）
+ * points: एंडपॉइंट स्टाइल: तीर, बिंदु, आदि (Endpoint style: arrow, dot, etc.)
  *
- * shadow?: 阴影
+ * shadow?: शैडो (Shadow)
  *
- * broken?: 折线控制点位置（[x, y]）
+ * broken?: ब्रोकन लाइन कंट्रोल पॉइंट (Broken line control point [x, y])
  *
- * broken2?: 双折线控制点位置（[x, y]）
+ * broken2?: डबल ब्रोकन लाइन कंट्रोल पॉइंट (Double broken line control point [x, y])
  *
- * curve?: 二次曲线控制点位置（[x, y]）
+ * curve?: कर्व कंट्रोल पॉइंट (Curve control point [x, y])
  *
- * cubic?: 三次曲线控制点位置（[[x1, y1], [x2, y2]]）
+ * cubic?: क्यूबिक कर्व कंट्रोल पॉइंट (Cubic curve control points)
  */
 export interface PPTLineElement extends Omit<PPTBaseElement, 'height' | 'rotate'> {
   type: 'line';
@@ -450,25 +450,25 @@ export interface ChartData {
 }
 
 /**
- * 图表元素
+ * चार्ट एलिमेंट (Chart Element)
  *
- * type: 元素类型（chart）
+ * type: एलिमेंट प्रकार (Element type: chart)
  *
- * fill?: 填充色
+ * fill?: फिल कलर (Fill color)
  *
- * chartType: 图表基础类型（bar/line/pie），所有图表类型都是由这三种基本类型衍生而来
+ * chartType: चार्ट प्रकार: बार, लाइन, पाई (Chart type: bar, line, pie)
  *
- * data: 图表数据
+ * data: चार्ट डेटा (Chart data)
  *
- * options: 扩展选项
+ * options: अतिरिक्त विकल्प (Options)
  *
- * outline?: 边框
+ * outline?: आउट线 (Outline)
  *
- * themeColors: 主题色
+ * themeColors: थीम कलर्स (Theme colors)
  *
- * textColor?: 坐标和文字颜色
+ * textColor?: टेक्स्ट और एक्सिस कलर (Text and axis color)
  *
- * lineColor?: 网格颜色
+ * lineColor?: ग्रिड कलर (Grid color)
  */
 export interface PPTChartElement extends PPTBaseElement {
   type: 'chart';
@@ -484,25 +484,25 @@ export interface PPTChartElement extends PPTBaseElement {
 
 export type TextAlign = 'left' | 'center' | 'right' | 'justify';
 /**
- * 表格单元格样式
+ * टेबल सेल स्टाइल (Table Cell Style)
  *
- * bold?: 加粗
+ * bold?: बोल्ड (Bold)
  *
- * em?: 斜体
+ * em?: इटैलिक (Italic)
  *
- * underline?: 下划线
+ * underline?: अंडरलाइन (Underline)
  *
- * strikethrough?: 删除线
+ * strikethrough?: स्ट्राइकथ्रू (Strikethrough)
  *
- * color?: 字体颜色
+ * color?: फ़ॉन्ट रंग (Font color)
  *
- * backcolor?: 填充色
+ * backcolor?: बैकग्राउंड रंग (Background color)
  *
- * fontsize?: 字体大小
+ * fontsize?: फ़ॉन्ट साइज़ (Font size)
  *
- * fontname?: 字体
+ * fontname?: फ़ॉन्ट नाम (Font name)
  *
- * align?: 对齐方式
+ * align?: अलाइनमेंट (Alignment)
  */
 export interface TableCellStyle {
   bold?: boolean;
@@ -517,17 +517,17 @@ export interface TableCellStyle {
 }
 
 /**
- * 表格单元格
+ * टेबल सेल (Table Cell)
  *
- * id: 单元格ID
+ * id: सेल आईडी (Cell ID)
  *
- * colspan: 合并列数
+ * colspan: कॉलम स्पैन (Column span)
  *
- * rowspan: 合并行数
+ * rowspan: रो स्पैन (Row span)
  *
- * text: 文字内容
+ * text: टेक्स्ट कंटेंट (Text content)
  *
- * style?: 单元格样式
+ * style?: सेल स्टाइल (Cell style)
  */
 export interface TableCell {
   id: string;
@@ -538,17 +538,17 @@ export interface TableCell {
 }
 
 /**
- * 表格主题
+ * टेबल थीम (Table Theme)
  *
- * color: 主题色
+ * color: थीम कलर (Theme color)
  *
- * rowHeader: 标题行
+ * rowHeader: रो हेडर (Row header)
  *
- * rowFooter: 汇总行
+ * rowFooter: रो फूटर (Row footer)
  *
- * colHeader: 第一列
+ * colHeader: कॉलम हेडर (Column header)
  *
- * colFooter: 最后一列
+ * colFooter: कॉलम फूटर (Column footer)
  */
 export interface TableTheme {
   color: string;
@@ -559,19 +559,19 @@ export interface TableTheme {
 }
 
 /**
- * 表格元素
+ * टेबल एलिमेंट (Table Element)
  *
- * type: 元素类型（table）
+ * type: एलिमेंट प्रकार (Element type: table)
  *
- * outline: 边框
+ * outline: आउटलाइन (Outline)
  *
- * theme?: 主题
+ * theme?: थीम (Theme)
  *
- * colWidths: 列宽数组，如[0.3, 0.5, 0.2]表示三列宽度分别占总宽度的30%, 50%, 20%
+ * colWidths: कॉलम विड्थ: प्रतिशत में (Column widths as percentages, e.g., [0.3, 0.5, 0.2])
  *
- * cellMinHeight: 单元格最小高度
+ * cellMinHeight: सेल की न्यूनतम ऊंचाई (Cell minimum height)
  *
- * data: 表格数据
+ * data: टेबल डेटा (Table data)
  */
 export interface PPTTableElement extends PPTBaseElement {
   type: 'table';
@@ -583,25 +583,25 @@ export interface PPTTableElement extends PPTBaseElement {
 }
 
 /**
- * LaTeX元素（公式）
+ * LaTeX एलिमेंट - फॉर्म्युला (LaTeX Element - Formula)
  *
- * type: 元素类型（latex）
+ * type: एलिमेंट प्रकार (Element type: latex)
  *
- * latex: latex代码
+ * latex: LaTeX कोड (LaTeX code)
  *
- * html: KaTeX渲染的HTML字符串（新版公式使用）
+ * html: KaTeX HTML (KaTeX rendered HTML)
  *
- * path: svg path（旧版SVG渲染，向后兼容，可选）
+ * path: SVG पाथ (SVG path: backward compatibility)
  *
- * color: 颜色（旧版SVG渲染，向后兼容，可选）
+ * color: रंग (Color: backward compatibility)
  *
- * strokeWidth: 路径宽度（旧版SVG渲染，向后兼容，可选）
+ * strokeWidth: आउटलाइन विड्थ (Stroke width: backward compatibility)
  *
- * viewBox: SVG的viewBox属性（旧版SVG渲染，向后兼容，可选）
+ * viewBox: SVG viewBox (SVG viewBox: backward compatibility)
  *
- * fixedRatio: 固定形状宽高比例（可选）
+ * fixedRatio: आस्पेक्ट रेशियो फिक्स रखें (Fixed aspect ratio)
  *
- * align: 公式水平对齐方式（left/center/right，默认center）
+ * align: फॉर्म्युला अलाइनमेंट (Formula horizontal alignment)
  */
 export interface PPTLatexElement extends PPTBaseElement {
   type: 'latex';
@@ -616,17 +616,17 @@ export interface PPTLatexElement extends PPTBaseElement {
 }
 
 /**
- * 视频元素
+ * वीडियो एलिमेंट (Video Element)
  *
- * type: 元素类型（video）
+ * type: एलिमेंट प्रकार (Element type: video)
  *
- * src: 视频地址
+ * src: वीडियो एड्रेस (Video address)
  *
- * autoplay: 自动播放
+ * autoplay: ऑटोप्ले (Autoplay)
  *
- * poster: 预览封面
+ * poster: पोस्टर इमेज (Preview poster)
  *
- * ext: 视频后缀，当资源链接缺少后缀时用该字段确认资源类型
+ * ext: वीडियो एक्सटेंशन (Video extension)
  */
 export interface PPTVideoElement extends PPTBaseElement {
   type: 'video';
@@ -637,21 +637,21 @@ export interface PPTVideoElement extends PPTBaseElement {
 }
 
 /**
- * 音频元素
+ * ऑडियो एलिमेंट (Audio Element)
  *
- * type: 元素类型（audio）
+ * type: एलिमेंट प्रकार (Element type: audio)
  *
- * fixedRatio: 固定图标宽高比例
+ * fixedRatio: ऑइकन आस्पेक्ट रेशियो (Fixed icon aspect ratio)
  *
- * color: 图标颜色
+ * color: ऑइकन कलर (Icon color)
  *
- * loop: 循环播放
+ * loop: लूप प्लेबैक (Loop playback)
  *
- * autoplay: 自动播放
+ * autoplay: ऑटोप्ले (Autoplay)
  *
- * src: 音频地址
+ * src: ऑडियो एड्रेस (Audio address)
  *
- * ext: 音频后缀，当资源链接缺少后缀时用该字段确认资源类型
+ * ext: ऑडियो एक्सटेंशन (Audio extension)
  */
 export interface PPTAudioElement extends PPTBaseElement {
   type: 'audio';
@@ -678,19 +678,19 @@ export type AnimationType = 'in' | 'out' | 'attention';
 export type AnimationTrigger = 'click' | 'meantime' | 'auto';
 
 /**
- * 元素动画
+ * एलिमेंट एनीमेशन (Element Animation)
  *
- * id: 动画id
+ * id: एनीमेशन आईडी (Animation ID)
  *
- * elId: 元素ID
+ * elId: एलिमेंट आईडी (Element ID)
  *
- * effect: 动画效果
+ * effect: एनीमेशन प्रभाव (Animation effect)
  *
- * type: 动画类型（入场、退场、强调）
+ * type: एनीमेशन प्रकार: प्रवेश, निकास, जोर (Animation type: in, out, attention)
  *
- * duration: 动画持续时间
+ * duration: एनीमेशन अवधि (Animation duration)
  *
- * trigger: 动画触发方式(click - 单击时、meantime - 与上一动画同时、auto - 上一动画之后)
+ * trigger: ट्रिगर: क्लिक, साथ में, बाद में (Trigger: click, meantime, auto)
  */
 export interface PPTAnimation {
   id: string;
@@ -709,15 +709,15 @@ export interface SlideBackgroundImage {
 }
 
 /**
- * 幻灯片背景
+ * स्लाइड बैकग्राउंड (Slide Background)
  *
- * type: 背景类型（纯色、图片、渐变）
+ * type: बैकग्राउंड प्रकार: ठोस रंग, इमेज, ग्रैडिएंट (Background type: color, image, gradient)
  *
- * color?: 背景颜色（纯色）
+ * color?: बैकग्राउंड रंग (Background color)
  *
- * image?: 图片背景
+ * image?: इमेज बैकग्राउंड (Image background)
  *
- * gradientType?: 渐变背景
+ * gradientType?: ग्रैडिएंट बैकग्राउंड (Gradient background)
  */
 export interface SlideBackground {
   type: SlideBackgroundType;
@@ -748,27 +748,27 @@ export interface SectionTag {
 export type SlideType = 'cover' | 'contents' | 'transition' | 'content' | 'end';
 
 /**
- * 幻灯片页面
+ * स्लाइड पेज (Slide Page)
  *
- * id: 页面ID
+ * id: पेज आईडी (Page ID)
  *
- * viewportSize: 视口大小
+ * viewportSize: व्यूपोर्ट साइज़ (Viewport size)
  *
- * viewportRatio: 视口宽高比
+ * viewportRatio: व्यूपोर्ट आस्पेक्ट रेशियो (Viewport aspect ratio)
  *
- * theme: 幻灯片主题
+ * theme: स्लाइड थीम (Slide theme)
  *
- * elements: 元素集合
+ * elements: एलिमेंट कलेक्शन (Element collection)
  *
- * background?: 页面背景
+ * background?: पेज बैकग्राउंड (Page background)
  *
- * animations?: 元素动画集合
+ * animations?: एनीमेशन कलेक्शन (Animation collection)
  *
- * turningMode?: 翻页方式
+ * turningMode?: ट्रांज़िशन मोड (Page turning mode)
  *
- * sectionTag?: 章节标签
+ * sectionTag?: सेक्शन टैग (Section tag)
  *
- * type?: 页面类型
+ * type?: स्लाइड प्रकार (Slide type)
  */
 export interface Slide {
   id: string;
@@ -784,15 +784,15 @@ export interface Slide {
 }
 
 /**
- * 幻灯片主题
+ * स्लाइड थीम (Slide Theme)
  *
- * backgroundColor: 页面背景颜色
+ * backgroundColor: पेज बैकग्राउंड रंग (Page background color)
  *
- * themeColor: 主题色，用于默认创建的形状颜色等
+ * themeColor: थीम कलर्स (Theme colors)
  *
- * fontColor: 字体颜色
+ * fontColor: फ़ॉन्ट रंग (Font color)
  *
- * fontName: 字体
+ * fontName: फ़ॉन्ट नाम (Font name)
  */
 export interface SlideTheme {
   backgroundColor: string;

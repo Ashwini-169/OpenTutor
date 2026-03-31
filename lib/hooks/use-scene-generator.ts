@@ -741,14 +741,28 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
         }
 
         const moduleScenes = store.getState().scenes.filter(s => s.moduleTitle === moduleTitle);
-        const lastScene = moduleScenes.length > 0 ? moduleScenes[moduleScenes.length - 1] : null;
+        
         let lastSceneContext = '';
+        if (moduleScenes.length > 0) {
+          lastSceneContext += `Existing Slide Titles in this Module:\n`;
+          lastSceneContext += moduleScenes.map((s, i) => `${i + 1}. ${s.title}`).join('\n') + '\n\n';
+        }
+
+        const lastScene = moduleScenes.length > 0 ? moduleScenes[moduleScenes.length - 1] : null;
         if (lastScene) {
-          lastSceneContext = `Title: ${lastScene.title}\n`;
+          lastSceneContext += `Last Slide Details (Title: ${lastScene.title}):\n`;
           const actions = lastScene.actions || [];
           const speechActions = actions.filter(a => a.type === 'speech');
           if (speechActions.length > 0) {
-             lastSceneContext += `Content: ${speechActions.map((a: any) => a.text).join(' ')}\n`;
+             const allText = speechActions.map((a: any) => a.text).filter(Boolean);
+             if (allText.length > 0) {
+               const head = allText[0];
+               const tail = allText.length > 1 ? allText[allText.length - 1] : '';
+               lastSceneContext += `- Opening Content: "${head}"\n`;
+               if (tail) {
+                 lastSceneContext += `- Closing Content: "${tail}"\n`;
+               }
+             }
           }
         }
 

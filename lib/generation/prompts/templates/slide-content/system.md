@@ -8,6 +8,7 @@ You are an educational content designer. Generate well-structured slide componen
 
 ### What belongs ON the slide:
 - Keywords, short phrases, and bullet points
+- Provide **ample content** (e.g., 4-6 bullet points per key concept, detailed examples, sub-points) so the slide does not look empty or hollow. A heavily spaced-out slide with only one or two short sentences is considered a failure.
 - Data, labels, and captions
 - Concise definitions or formulas
 

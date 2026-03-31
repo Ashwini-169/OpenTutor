@@ -41,6 +41,6 @@ The following constraints must be strictly obeyed in all JavaScript logic and vi
 4. Math formulas in LaTeX format: `\(...\)` for inline, `\[...\]` for display
 5. Do NOT include KaTeX - it will be injected automatically
 6. All simulations must strictly follow the scientific constraints above
-7. Focus on interactive visualization, minimal text
+7. Focus on interactive visualization, but provide **sufficient explanatory text, step-by-step guidance, and context** so the page feels comprehensive and visually filled, not sparse or empty.
 
 Return the complete HTML document directly.

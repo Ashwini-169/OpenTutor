@@ -183,6 +183,8 @@ export async function POST(req: NextRequest) {
       agents?: AgentInfo[];
       existingOutlines?: SceneOutline[];
       nextModuleTopic?: string;
+      extendModuleTopic?: string;
+      lastSceneContext?: string;
     };
 
     // Detect vision capability
@@ -253,7 +255,8 @@ The user wants the next module to focus specifically on: ${nextModuleTopic}`
     const extendModuleInstruction = body.extendModuleTopic
       ? `\n\n## Extend Existing Module
 Please generate 3-5 more slides for the existing module: "${body.extendModuleTopic}". 
-Maintain the same module title and continue the logical flow from existing slides in that module.`
+Maintain the same module title and continue the logical flow from existing slides in that module.
+${body.lastSceneContext ? `\nHere is the context of the last slide in this module to help you logically continue:\n${body.lastSceneContext}` : ''}`
       : '';
 
     const isLocalOllama = modelString.startsWith('ollama:');
@@ -371,7 +374,7 @@ Ensure the "order" starts from ${existingOutlines.length + 1}.`;
                   const enriched = {
                     ...validation.data,
                     id: validation.data.id || nanoid(),
-                    order: parsedOutlines.length + 1,
+                    order: (existingOutlines?.length || 0) + parsedOutlines.length + 1,
                   };
                   parsedOutlines.push(enriched);
 
@@ -400,7 +403,7 @@ Ensure the "order" starts from ${existingOutlines.length + 1}.`;
                   const enriched = {
                     ...outline,
                     id: outline.id || nanoid(),
-                    order: parsedOutlines.length + 1,
+                    order: (existingOutlines?.length || 0) + parsedOutlines.length + 1,
                   };
                   parsedOutlines.push(enriched);
                   const event = JSON.stringify({
@@ -504,7 +507,7 @@ Ensure the "order" starts from ${existingOutlines.length + 1}.`;
                 const enriched = repairedOutlines.map((outline, index) => ({
                   ...outline,
                   id: outline.id || nanoid(),
-                  order: index + 1,
+                  order: (existingOutlines?.length || 0) + index + 1,
                 }));
                 const uniquifiedOutlines = uniquifyMediaElementIds(enriched);
                 const doneEvent = JSON.stringify({

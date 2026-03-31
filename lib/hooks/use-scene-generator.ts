@@ -740,6 +740,18 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
           throw new Error('No course requirements found. Cannot continue lecture without context.');
         }
 
+        const moduleScenes = store.getState().scenes.filter(s => s.moduleTitle === moduleTitle);
+        const lastScene = moduleScenes.length > 0 ? moduleScenes[moduleScenes.length - 1] : null;
+        let lastSceneContext = '';
+        if (lastScene) {
+          lastSceneContext = `Title: ${lastScene.title}\n`;
+          const actions = lastScene.actions || [];
+          const speechActions = actions.filter(a => a.type === 'speech');
+          if (speechActions.length > 0) {
+             lastSceneContext += `Content: ${speechActions.map((a: any) => a.text).join(' ')}\n`;
+          }
+        }
+
         const response = await fetch('/api/generate/scene-outlines-stream', {
           method: 'POST',
           headers: getApiHeaders(),
@@ -752,6 +764,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
             agents: params.agents,
             existingOutlines: outlines,
             extendModuleTopic: moduleTitle,
+            lastSceneContext: lastSceneContext || undefined,
           }),
         });
 

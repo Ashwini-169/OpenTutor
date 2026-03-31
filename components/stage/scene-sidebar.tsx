@@ -11,12 +11,23 @@ import {
   Globe,
   AlertCircle,
   RefreshCw,
+  Plus,
+  ChevronDown,
+  MoreVertical,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThumbnailSlide } from '@/components/slide-renderer/components/ThumbnailSlide';
 import { useStageStore, useCanvasStore } from '@/lib/store';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import type { SceneType, SlideContent } from '@/lib/types/stage';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
 import { PENDING_SCENE_ID } from '@/lib/store/stage';
 
 interface SceneSidebarProps {
@@ -25,6 +36,8 @@ interface SceneSidebarProps {
   readonly onSceneSelect?: (sceneId: string) => void;
   readonly onRetryOutline?: (outlineId: string) => Promise<void>;
   readonly onRetrySpeech?: (sceneId: string) => Promise<void>;
+  readonly onContinueLecture?: (topic: string) => Promise<void>;
+  readonly onExtendModule?: (moduleTitle: string) => Promise<void>;
 }
 
 const DEFAULT_WIDTH = 220;
@@ -37,6 +50,8 @@ export function SceneSidebar({
   onSceneSelect,
   onRetryOutline,
   onRetrySpeech,
+  onContinueLecture,
+  onExtendModule,
 }: SceneSidebarProps) {
   const { t } = useI18n();
   const router = useRouter();
@@ -153,198 +168,271 @@ export function SceneSidebar({
         </div>
 
         {/* Scenes List */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-2 scrollbar-hide pt-1">
-          {scenes.map((scene, index) => {
-            const isActive = currentSceneId === scene.id;
-            const Icon = getSceneTypeIcon(scene.type);
-            const isSlide = scene.type === 'slide';
-            const slideContent = isSlide ? (scene.content as SlideContent) : null;
-            const isSpeechFailed = speechFailedSceneIds.includes(scene.id);
-            const isRetryingSpeech = retryingSpeechSceneId === scene.id;
-
-            return (
-              <div
-                key={scene.id}
-                onClick={() => {
-                  if (onSceneSelect) {
-                    onSceneSelect(scene.id);
-                  } else {
-                    setCurrentSceneId(scene.id);
-                  }
-                }}
-                className={cn(
-                  'group relative rounded-lg transition-all duration-200 cursor-pointer flex flex-col gap-1 p-1.5',
-                  isActive
-                    ? 'bg-purple-50 dark:bg-purple-900/20 ring-1 ring-purple-200 dark:ring-purple-700'
-                    : 'hover:bg-gray-50/80 dark:hover:bg-gray-800/50',
-                )}
-              >
-                {/* Scene Header */}
-                <div className="flex justify-between items-center px-2 pt-0.5">
-                  <div className="flex items-center gap-2 max-w-full">
-                    <span
-                      className={cn(
-                        'text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0',
-                        isActive
-                          ? 'bg-purple-600 dark:bg-purple-500 text-white shadow-sm shadow-purple-500/30'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
-                      )}
-                    >
-                      {index + 1}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-xs font-bold truncate transition-colors',
-                        isActive
-                          ? 'text-purple-700 dark:text-purple-300'
-                          : 'text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100',
-                      )}
-                    >
-                      {scene.title}
-                    </span>
-                  </div>
-                  {isSpeechFailed && (
-                    <button
-                      onClick={(e) => handleRetrySpeech(e, scene.id)}
-                      disabled={isRetryingSpeech}
-                      title={t('generation.retrySpeech')}
-                      className="shrink-0 p-1 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded text-amber-500 dark:text-amber-400 disabled:opacity-50 transition-colors"
-                    >
-                      <RefreshCw className={cn("w-3.5 h-3.5", isRetryingSpeech && "animate-spin")} />
-                    </button>
-                  )}
-                </div>
-
-                {/* Thumbnail */}
-                <div className="relative aspect-video w-full rounded overflow-hidden bg-gray-100 dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/5">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {isSlide && slideContent ? (
-                      <ThumbnailSlide
-                        slide={slideContent.canvas}
-                        viewportSize={viewportSize}
-                        viewportRatio={viewportRatio}
-                        size={Math.max(100, sidebarWidth - 28)}
-                      />
-                    ) : scene.type === 'quiz' ? (
-                      /* Quiz: question bar + 2x2 option grid */
-                      <div className="w-full h-full bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/20 p-2 flex flex-col">
-                        <div className="h-1.5 w-4/5 bg-orange-200/70 dark:bg-orange-700/30 rounded-full mb-1.5" />
-                        <div className="flex-1 grid grid-cols-2 gap-1">
-                          {[0, 1, 2, 3].map((i) => (
-                            <div
-                              key={i}
-                              className={cn(
-                                'rounded flex items-center gap-1 px-1',
-                                i === 1
-                                  ? 'bg-orange-400/20 dark:bg-orange-500/20 border border-orange-300/50 dark:border-orange-600/30'
-                                  : 'bg-white/60 dark:bg-white/5 border border-orange-100/60 dark:border-orange-800/20',
-                              )}
-                            >
-                              <div
-                                className={cn(
-                                  'w-1.5 h-1.5 rounded-full shrink-0',
-                                  i === 1
-                                    ? 'bg-orange-400 dark:bg-orange-500'
-                                    : 'bg-orange-200 dark:bg-orange-700/50',
-                                )}
-                              />
-                              <div
-                                className={cn(
-                                  'h-1 rounded-full flex-1',
-                                  i === 1
-                                    ? 'bg-orange-300/60 dark:bg-orange-600/40'
-                                    : 'bg-orange-100/80 dark:bg-orange-800/30',
-                                )}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : scene.type === 'interactive' ? (
-                      /* Interactive: browser window with chrome + content */
-                      <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 p-1.5 flex flex-col">
-                        <div className="flex items-center gap-1 mb-1 pb-1 border-b border-emerald-200/40 dark:border-emerald-700/20">
-                          <div className="flex gap-0.5">
-                            <div className="w-1 h-1 rounded-full bg-red-300 dark:bg-red-500/60" />
-                            <div className="w-1 h-1 rounded-full bg-amber-300 dark:bg-amber-500/60" />
-                            <div className="w-1 h-1 rounded-full bg-green-300 dark:bg-green-500/60" />
-                          </div>
-                          <div className="h-1.5 flex-1 bg-emerald-200/40 dark:bg-emerald-700/30 rounded-full ml-0.5" />
-                        </div>
-                        <div className="flex-1 flex gap-1">
-                          <div className="w-1/4 space-y-1 pt-0.5">
-                            {[1, 2, 3].map((i) => (
-                              <div
-                                key={i}
-                                className="h-0.5 w-full bg-emerald-200/60 dark:bg-emerald-700/30 rounded-full"
-                              />
-                            ))}
-                          </div>
-                          <div className="flex-1 bg-emerald-100/40 dark:bg-emerald-800/20 rounded flex items-center justify-center border border-emerald-200/40 dark:border-emerald-700/20">
-                            <Globe className="w-4 h-4 text-emerald-300/80 dark:text-emerald-600/50" />
-                          </div>
-                        </div>
-                      </div>
-                    ) : scene.type === 'pbl' ? (
-                      /* PBL: kanban board with 3 columns */
-                      <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/20 p-1.5 flex flex-col">
-                        <div className="flex items-center gap-1 mb-1.5">
-                          <div className="w-1.5 h-1.5 rounded bg-blue-300 dark:bg-blue-600" />
-                          <div className="h-1 w-8 bg-blue-200/60 dark:bg-blue-700/30 rounded-full" />
-                        </div>
-                        <div className="flex-1 flex gap-1 overflow-hidden">
-                          {[0, 1, 2].map((col) => (
-                            <div
-                              key={col}
-                              className="flex-1 bg-white/50 dark:bg-white/5 rounded p-0.5 flex flex-col gap-0.5"
-                            >
-                              <div
-                                className={cn(
-                                  'h-0.5 w-3 rounded-full mb-0.5',
-                                  col === 0
-                                    ? 'bg-blue-300/70'
-                                    : col === 1
-                                      ? 'bg-amber-300/70'
-                                      : 'bg-green-300/70',
-                                )}
-                              />
-                              {Array.from({
-                                length: col === 0 ? 3 : col === 1 ? 2 : 1,
-                              }).map((_, i) => (
-                                <div
-                                  key={i}
-                                  className="h-2 w-full bg-blue-100/60 dark:bg-blue-800/20 rounded border border-blue-200/30 dark:border-blue-700/20"
-                                />
-                              ))}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      /* Fallback */
-                      <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-500">
-                        <Icon className="w-4 h-4" />
-                        <span className="text-[9px] font-bold uppercase tracking-wider opacity-80">
-                          {scene.type}
-                        </span>
-                      </div>
-                    )}
-
-                    {isSlide && (
-                      <div
-                        className={cn(
-                          'absolute inset-0 bg-purple-500/0 transition-colors',
-                          isActive
-                            ? 'bg-purple-500/0'
-                            : 'group-hover:bg-black/5 dark:group-hover:bg-white/5',
-                        )}
-                      />
-                    )}
-                  </div>
-                </div>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-4 scrollbar-hide pt-1">
+          {Object.entries(
+            scenes.reduce(
+              (acc, scene) => {
+                const mod = scene.moduleTitle || 'Module 1';
+                if (!acc[mod]) acc[mod] = [];
+                acc[mod].push(scene);
+                return acc;
+              },
+              {} as Record<string, typeof scenes>,
+            ),
+          ).map(([moduleName, moduleScenes], modIndex) => (
+            <div key={moduleName} className="space-y-2">
+              <div className="px-2 py-1 flex items-center justify-between group/mod">
+                <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
+                  <div className="w-1.5 h-3 rounded-full bg-purple-400/30 dark:bg-purple-600/30" />
+                  {moduleName}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onExtendModule && generationStatus !== 'generating') {
+                      onExtendModule(moduleName);
+                    }
+                  }}
+                  disabled={generationStatus === 'generating'}
+                  className="p-1 rounded bg-gray-100/50 dark:bg-gray-800/50 text-gray-400 hover:text-purple-600 hover:bg-purple-100 dark:hover:text-purple-400 dark:hover:bg-purple-900/40 opacity-0 group-hover/mod:opacity-100 transition-all active:scale-90 disabled:opacity-30 flex items-center gap-1 cursor-pointer"
+                  title="Add 3 more slides to this module"
+                >
+                  <Plus className="w-2.5 h-2.5" />
+                  <span className="text-[9px] font-bold">Add Slide</span>
+                </button>
               </div>
-            );
-          })}
+              <div className="space-y-2">
+                {moduleScenes.map((scene) => {
+                  const sceneIndex = scenes.indexOf(scene);
+                  const isActive = currentSceneId === scene.id;
+                  const Icon = getSceneTypeIcon(scene.type);
+                  const isSlide = scene.type === 'slide';
+                  const slideContent = isSlide ? (scene.content as SlideContent) : null;
+                  const isSpeechFailed = speechFailedSceneIds.includes(scene.id);
+                  const isRetryingSpeech = retryingSpeechSceneId === scene.id;
+
+                  return (
+                    <div
+                      key={scene.id}
+                      onClick={() => {
+                        if (onSceneSelect) {
+                          onSceneSelect(scene.id);
+                        } else {
+                          setCurrentSceneId(scene.id);
+                        }
+                      }}
+                      className={cn(
+                        'group relative rounded-lg transition-all duration-200 cursor-pointer flex flex-col gap-1 p-1.5',
+                        isActive
+                          ? 'bg-purple-50 dark:bg-purple-900/20 ring-1 ring-purple-200 dark:ring-purple-700'
+                          : 'hover:bg-gray-50/80 dark:hover:bg-gray-800/50',
+                      )}
+                    >
+                      {/* Scene Header */}
+                      <div className="flex justify-between items-center px-2 pt-0.5">
+                        <div className="flex items-center gap-2 max-w-full">
+                          <span
+                            className={cn(
+                              'text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0',
+                              isActive
+                                ? 'bg-purple-600 dark:bg-purple-500 text-white shadow-sm shadow-purple-500/30'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
+                            )}
+                          >
+                            {sceneIndex + 1}
+                          </span>
+                          <span
+                            className={cn(
+                              'text-xs font-bold truncate transition-colors',
+                              isActive
+                                ? 'text-purple-700 dark:text-purple-300'
+                                : 'text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100',
+                            )}
+                          >
+                            {scene.title}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {isSpeechFailed && (
+                            <button
+                              onClick={(e) => handleRetrySpeech(e, scene.id)}
+                              disabled={isRetryingSpeech}
+                              title={t('generation.retrySpeech')}
+                              className="shrink-0 p-1 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded text-amber-500 dark:text-amber-400 disabled:opacity-50 transition-colors"
+                            >
+                              <RefreshCw
+                                className={cn('w-3.5 h-3.5', isRetryingSpeech && 'animate-spin')}
+                              />
+                            </button>
+                          )}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <button className="p-1 rounded text-gray-400 hover:text-purple-600 hover:bg-purple-100/50 dark:hover:bg-purple-900/40 transition-all opacity-0 group-hover:opacity-100 active:scale-90">
+                                <MoreVertical className="w-3.5 h-3.5" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuLabel>Slide Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="gap-2 cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const outline = useStageStore.getState().outlines.find(o => o.order === scene.order);
+                                  if (outline) handleRetryOutline(outline.id);
+                                }}
+                              >
+                                <RefreshCw className="w-3.5 h-3.5" />
+                                <span>Regenerate Content</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="gap-2 cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRetrySpeech(e, scene.id);
+                                }}
+                              >
+                                <Globe className="w-3.5 h-3.5" />
+                                <span>Regenerate Speech</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+
+                      {/* Thumbnail */}
+                      <div className="relative aspect-video w-full rounded overflow-hidden bg-gray-100 dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/5">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          {isSlide && slideContent ? (
+                            <ThumbnailSlide
+                              slide={slideContent.canvas}
+                              viewportSize={viewportSize}
+                              viewportRatio={viewportRatio}
+                              size={Math.max(100, sidebarWidth - 28)}
+                            />
+                          ) : scene.type === 'quiz' ? (
+                            /* Quiz: question bar + 2x2 option grid */
+                            <div className="w-full h-full bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/20 p-2 flex flex-col">
+                              <div className="h-1.5 w-4/5 bg-orange-200/70 dark:bg-orange-700/30 rounded-full mb-1.5" />
+                              <div className="flex-1 grid grid-cols-2 gap-1">
+                                {[0, 1, 2, 3].map((i) => (
+                                  <div
+                                    key={i}
+                                    className={cn(
+                                      'rounded flex items-center gap-1 px-1',
+                                      i === 1
+                                        ? 'bg-orange-400/20 dark:bg-orange-500/20 border border-orange-300/50 dark:border-orange-600/30'
+                                        : 'bg-white/60 dark:bg-white/5 border border-orange-100/60 dark:border-orange-800/20',
+                                    )}
+                                  >
+                                    <div
+                                      className={cn(
+                                        'w-1.5 h-1.5 rounded-full shrink-0',
+                                        i === 1
+                                          ? 'bg-orange-400 dark:bg-orange-500'
+                                          : 'bg-orange-200 dark:bg-orange-700/50',
+                                      )}
+                                    />
+                                    <div
+                                      className={cn(
+                                        'h-1 rounded-full flex-1',
+                                        i === 1
+                                          ? 'bg-orange-300/60 dark:bg-orange-600/40'
+                                          : 'bg-orange-100/80 dark:bg-orange-800/30',
+                                      )}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : scene.type === 'interactive' ? (
+                            /* Interactive: browser window with chrome + content */
+                            <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 p-1.5 flex flex-col">
+                              <div className="flex items-center gap-1 mb-1 pb-1 border-b border-emerald-200/40 dark:border-emerald-700/20">
+                                <div className="flex gap-0.5">
+                                  <div className="w-1 h-1 rounded-full bg-red-300 dark:bg-red-500/60" />
+                                  <div className="w-1 h-1 rounded-full bg-amber-300 dark:bg-amber-500/60" />
+                                  <div className="w-1 h-1 rounded-full bg-green-300 dark:bg-green-500/60" />
+                                </div>
+                                <div className="h-1.5 flex-1 bg-emerald-200/40 dark:bg-emerald-700/30 rounded-full ml-0.5" />
+                              </div>
+                              <div className="flex-1 flex gap-1">
+                                <div className="w-1/4 space-y-1 pt-0.5">
+                                  {[1, 2, 3].map((i) => (
+                                    <div
+                                      key={i}
+                                      className="h-0.5 w-full bg-emerald-200/60 dark:bg-emerald-700/30 rounded-full"
+                                    />
+                                  ))}
+                                </div>
+                                <div className="flex-1 bg-emerald-100/40 dark:bg-emerald-800/20 rounded flex items-center justify-center border border-emerald-200/40 dark:border-emerald-700/20">
+                                  <Globe className="w-4 h-4 text-emerald-300/80 dark:text-emerald-600/50" />
+                                </div>
+                              </div>
+                            </div>
+                          ) : scene.type === 'pbl' ? (
+                            /* PBL: kanban board with 3 columns */
+                            <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/20 p-1.5 flex flex-col">
+                              <div className="flex items-center gap-1 mb-1.5">
+                                <div className="w-1.5 h-1.5 rounded bg-blue-300 dark:bg-blue-600" />
+                                <div className="h-1 w-8 bg-blue-200/60 dark:bg-blue-700/30 rounded-full" />
+                              </div>
+                              <div className="flex-1 flex gap-1 overflow-hidden">
+                                {[0, 1, 2].map((col) => (
+                                  <div
+                                    key={col}
+                                    className="flex-1 bg-white/50 dark:bg-white/5 rounded p-0.5 flex flex-col gap-0.5"
+                                  >
+                                    <div
+                                      className={cn(
+                                        'h-0.5 w-3 rounded-full mb-0.5',
+                                        col === 0
+                                          ? 'bg-blue-300/70'
+                                          : col === 1
+                                            ? 'bg-amber-300/70'
+                                            : 'bg-green-300/70',
+                                      )}
+                                    />
+                                    {Array.from({
+                                      length: col === 0 ? 3 : col === 1 ? 2 : 1,
+                                    }).map((_, i) => (
+                                      <div
+                                        key={i}
+                                        className="h-2 w-full bg-blue-100/60 dark:bg-blue-800/20 rounded border border-blue-200/30 dark:border-blue-700/20"
+                                      />
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            /* Fallback */
+                            <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-500">
+                              <Icon className="w-4 h-4" />
+                              <span className="text-[9px] font-bold uppercase tracking-wider opacity-80">
+                                {scene.type}
+                              </span>
+                            </div>
+                          )}
+
+                          {isSlide && (
+                            <div
+                              className={cn(
+                                'absolute inset-0 bg-purple-500/0 transition-colors',
+                                isActive
+                                  ? 'bg-purple-500/0'
+                                  : 'group-hover:bg-black/5 dark:group-hover:bg-white/5',
+                              )}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
 
           {/* Single placeholder for the next generating page (clickable) */}
           {generatingOutlines.length > 0 &&
@@ -467,6 +555,24 @@ export function SceneSidebar({
                 </div>
               );
             })()}
+
+          {/* Add Module Button */}
+          {(generationStatus === 'completed' || generationStatus === 'idle') && (
+            <button
+              onClick={() => {
+                const nextTopic = prompt('Enter the topic for the next module:');
+                if (nextTopic && onContinueLecture) {
+                  onContinueLecture(nextTopic);
+                }
+              }}
+              className="flex items-center justify-center gap-2 p-3 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-purple-300 dark:hover:border-purple-500/50 hover:text-purple-600 dark:hover:text-purple-400 transition-all active:scale-95 group shrink-0"
+            >
+              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center group-hover:bg-purple-100 dark:group-hover:bg-purple-900/40 transition-colors">
+                <Plus className="w-4 h-4" />
+              </div>
+              <span className="text-sm font-semibold">Add Next Module</span>
+            </button>
+          )}
         </div>
 
         {/* Spacer to push toggle button area */}

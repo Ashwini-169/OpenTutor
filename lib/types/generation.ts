@@ -126,6 +126,8 @@ export interface SceneOutline {
     issueCount?: number;
     language: 'hi-IN' | 'en-US';
   };
+  // Module information for phased generation
+  moduleTitle?: string; // e.g., "Module 1: Introduction"
 }
 
 // ==================== Stage 3 Output: Generated Content ====================

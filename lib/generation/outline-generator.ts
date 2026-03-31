@@ -20,6 +20,7 @@ const OutlineSchema = z.object({
   id: z.string().optional(),
   type: z.enum(['slide', 'quiz', 'interactive', 'pbl']),
   title: z.string().min(1),
+  moduleTitle: z.string().optional(),
   description: z.string().min(1),
   keyPoints: z.array(z.string()).min(1),
 });
@@ -78,7 +79,7 @@ Rules:
 - Output must be a JSON array of scene outlines.
 - Every item must include: type, title, description, keyPoints.
 - type must be one of: slide, quiz, interactive, pbl.`,
-    user: `Generate 4-8 scene outlines.
+    user: `Generate 4-8 scene outlines for **Module 1** based on the following requirements. 
 Requirement: ${params.requirements.requirement}
 Language: ${params.requirements.language}
 PDF Content:
@@ -92,7 +93,9 @@ ${params.teacherContext || 'None'}
 Student Profile:
 ${params.userProfileText || 'None'}
 Media Policy:
-${params.mediaGenerationPolicy || 'Image/video generation allowed when useful.'}`,
+${params.mediaGenerationPolicy || 'Image/video generation allowed when useful.'}
+
+Each scene should include a "moduleTitle" like "Module 1: [Topic name]".`,
   };
 }
 

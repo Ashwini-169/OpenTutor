@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play } from 'lucide-react';
+import { Play, BookOpen, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SceneRenderer } from '@/components/stage/scene-renderer';
 import { SceneProvider } from '@/lib/contexts/scene-context';
@@ -21,6 +21,7 @@ interface CanvasAreaProps extends CanvasToolbarProps {
   readonly isSpeechFailed?: boolean;
   readonly onRetryGeneration?: () => void;
   readonly onRetrySpeech?: () => void;
+  readonly onContinueLecture?: (topic: string) => void;
 }
 
 export function CanvasArea({
@@ -47,7 +48,9 @@ export function CanvasArea({
   isSpeechFailed,
   onRetryGeneration,
   onRetrySpeech,
-}: CanvasAreaProps) {
+  onContinueLecture,
+  isGenerating,
+}: CanvasAreaProps & { isGenerating?: boolean }) {
   const { t } = useI18n();
   const showControls = mode === 'playback' && !whiteboardOpen;
   const showPlayHint =
@@ -156,6 +159,30 @@ export function CanvasArea({
                         {t('generation.retryScene')}
                       </button>
                     )}
+                  </div>
+                ) : !isGenerating ? (
+                  <div className="flex flex-col items-center gap-6 max-w-sm text-center px-4">
+                    <div className="w-16 h-16 rounded-3xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 shadow-sm">
+                      <BookOpen className="w-8 h-8" />
+                    </div>
+                    <div className="space-y-2">
+                       <h3 className="text-lg font-bold text-gray-900 dark:text-white">Module Completed</h3>
+                       <p className="text-sm text-gray-500 dark:text-gray-400">
+                         This module has finished. Would you like to continue the lecture with a new topic?
+                       </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const nextTopic = prompt('Enter the topic for the next module:');
+                        if (nextTopic && onContinueLecture) {
+                          onContinueLecture(nextTopic);
+                        }
+                      }}
+                      className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold shadow-lg shadow-purple-500/25 transition-all active:scale-95 flex items-center gap-2 group"
+                    >
+                      <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                      Continue Lecture
+                    </button>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-4">

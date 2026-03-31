@@ -40,9 +40,13 @@ import { VisuallyHidden } from 'radix-ui';
 export function Stage({
   onRetryOutline,
   onRetrySpeech,
+  onContinueLecture,
+  onExtendModule,
 }: {
   onRetryOutline?: (outlineId: string) => Promise<void>;
   onRetrySpeech?: (sceneId: string) => Promise<void>;
+  onContinueLecture?: (topic: string) => Promise<void>;
+  onExtendModule?: (moduleTitle: string) => Promise<void>;
 }) {
   const { t } = useI18n();
   const { mode, getCurrentScene, scenes, currentSceneId, setCurrentSceneId, generatingOutlines } =
@@ -684,6 +688,8 @@ export function Stage({
         onSceneSelect={gatedSceneSwitch}
         onRetryOutline={onRetryOutline}
         onRetrySpeech={onRetrySpeech}
+        onContinueLecture={onContinueLecture}
+        onExtendModule={onExtendModule}
       />
 
       {/* Main Content Area */}
@@ -738,6 +744,8 @@ export function Stage({
                 ? () => onRetrySpeech(currentScene.id)
                 : undefined
             }
+            onContinueLecture={onContinueLecture}
+            isGenerating={useStageStore.getState().generationStatus === 'generating'}
           />
         </div>
 

@@ -54,6 +54,7 @@ const StreamOutlineSchema = z.object({
   id: z.string().optional(),
   type: z.enum(['slide', 'quiz', 'interactive', 'pbl']),
   title: z.string().min(1),
+  moduleTitle: z.string().optional(),
   description: z.string().min(1),
   keyPoints: z.array(z.string()).min(1),
 });
@@ -164,13 +165,24 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Requirements are required');
     }
 
-    const { requirements, pdfText, pdfImages, imageMapping, researchContext, agents } = body as {
+    const {
+      requirements,
+      pdfText,
+      pdfImages,
+      imageMapping,
+      researchContext,
+      agents,
+      existingOutlines,
+      nextModuleTopic,
+    } = body as {
       requirements: UserRequirements;
       pdfText?: string;
       pdfImages?: PdfImage[];
       imageMapping?: ImageMapping;
       researchContext?: string;
       agents?: AgentInfo[];
+      existingOutlines?: SceneOutline[];
+      nextModuleTopic?: string;
     };
 
     // Detect vision capability
@@ -218,10 +230,39 @@ export async function POST(req: NextRequest) {
     }
 
     const teacherContext = formatTeacherPersonaForPrompt(agents);
+    const moduleCounts = (existingOutlines || [])
+      .map(o => {
+        const m = o.moduleTitle?.match(/Module (\d+)/);
+        return m ? parseInt(m[1]) : 1;
+      })
+      .filter(n => !isNaN(n));
+      
+    const lastModuleNum = moduleCounts.length > 0 ? Math.max(...moduleCounts) : 1;
+
+    const previousContext = existingOutlines && existingOutlines.length > 0
+      ? `\n\n## Existing Outlines (Modules 1-${lastModuleNum})
+The following outlines have already been generated. Continue from where they left off.
+${existingOutlines.map(o => `- [${o.moduleTitle || 'Module ' + lastModuleNum}] ${o.title}`).join('\n')}`
+      : '';
+
+    const nextModuleInstruction = nextModuleTopic
+      ? `\n\n## Next Module Focus
+The user wants the next module to focus specifically on: ${nextModuleTopic}`
+      : '';
+
+    const extendModuleInstruction = body.extendModuleTopic
+      ? `\n\n## Extend Existing Module
+Please generate 3-5 more slides for the existing module: "${body.extendModuleTopic}". 
+Maintain the same module title and continue the logical flow from existing slides in that module.`
+      : '';
+
     const isLocalOllama = modelString.startsWith('ollama:');
     const prompts = isLocalOllama
       ? buildCompactOutlinePrompt({
-          requirements,
+          requirements: {
+            ...requirements,
+            requirement: `${requirements.requirement}${previousContext}${nextModuleInstruction}${extendModuleInstruction}`
+          },
           pdfContent: pdfText ? pdfText.substring(0, Math.min(MAX_PDF_CONTENT_CHARS, 3000)) : 'None',
           availableImages: availableImagesText,
           mediaGenerationPolicy: mediaGenerationPolicy || 'Image and video generation are allowed.',
@@ -230,7 +271,7 @@ export async function POST(req: NextRequest) {
           userProfileText: '',
         })
       : buildPrompt(PROMPT_IDS.REQUIREMENTS_TO_OUTLINES, {
-          requirement: requirements.requirement,
+          requirement: `${requirements.requirement}${previousContext}${nextModuleInstruction}${extendModuleInstruction}`,
           language: requirements.language,
           pdfContent: pdfText
             ? pdfText.substring(0, MAX_PDF_CONTENT_CHARS)
@@ -240,6 +281,15 @@ export async function POST(req: NextRequest) {
           mediaGenerationPolicy,
           teacherContext,
         });
+
+    if (prompts && existingOutlines && existingOutlines.length > 0) {
+      const currentModuleNum = Math.max(...existingOutlines.map(o => parseInt(o.moduleTitle?.match(/Module (\d+)/)?.[1] || '1')));
+      const nextModuleNum = currentModuleNum + 1;
+      prompts.user += `\n\n**IMPORTANT**: You are now generating **Module ${nextModuleNum}**. 
+Output 4-8 scene outlines for this module. 
+Every scene "moduleTitle" MUST start with "Module ${nextModuleNum}:".
+Ensure the "order" starts from ${existingOutlines.length + 1}.`;
+    }
 
     if (!prompts) {
       return apiError('INTERNAL_ERROR', 500, 'Prompt template not found');

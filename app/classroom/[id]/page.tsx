@@ -26,7 +26,14 @@ export default function ClassroomDetailPage() {
 
   const generationStartedRef = useRef(false);
 
-  const { generateRemaining, retrySingleOutline, regenerateSpeech, stop } = useSceneGenerator({
+  const { 
+    generateRemaining, 
+    retrySingleOutline, 
+    regenerateSpeech, 
+    stop, 
+    continueLecture,
+    extendModule 
+  } = useSceneGenerator({
     onComplete: () => {
       log.info('[Classroom] All scenes generated');
     },
@@ -175,7 +182,12 @@ export default function ClassroomDetailPage() {
               </div>
             </div>
           ) : (
-            <Stage onRetryOutline={retrySingleOutline} onRetrySpeech={regenerateSpeech} />
+            <Stage 
+              onRetryOutline={retrySingleOutline} 
+              onRetrySpeech={regenerateSpeech} 
+              onContinueLecture={continueLecture}
+              onExtendModule={extendModule}
+            />
           )}
         </div>
       </MediaStageProvider>

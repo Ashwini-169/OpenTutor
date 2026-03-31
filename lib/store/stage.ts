@@ -153,11 +153,24 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
       );
       return;
     }
-    const scenes = [...get().scenes, scene];
+    // Replace existing scene with same order if it exists (for regeneration)
+    const existingIndex = get().scenes.findIndex((s) => s.order === scene.order);
+    const existingSceneAtOrder = existingIndex !== -1 ? get().scenes[existingIndex] : null;
+    const isCurrentScene = existingSceneAtOrder && get().currentSceneId === existingSceneAtOrder.id;
+
+    const scenes = [...get().scenes];
+    if (existingIndex !== -1) {
+      scenes[existingIndex] = scene;
+    } else {
+      scenes.push(scene);
+      // Only sort if we appended
+      scenes.sort((a, b) => a.order - b.order);
+    }
+
     // Remove the matching outline from generatingOutlines (match by order)
     const generatingOutlines = get().generatingOutlines.filter((o) => o.order !== scene.order);
     // Auto-switch from pending page to the newly generated scene
-    const shouldSwitch = get().currentSceneId === PENDING_SCENE_ID;
+    const shouldSwitch = get().currentSceneId === PENDING_SCENE_ID || isCurrentScene;
     set({
       scenes,
       generatingOutlines,

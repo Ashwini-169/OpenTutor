@@ -92,8 +92,8 @@ export function parseActionsFromStructuredOutput(
     if (!item || typeof item !== 'object' || !('type' in item)) continue;
     const typedItem = item as Record<string, unknown>;
 
-    if (typedItem.type === 'text') {
-      const text = ((typedItem.content as string) || '').trim();
+    if (typedItem.type === 'text' || typedItem.type === 'speech') {
+      const text = ((typedItem.content as string) || (typedItem.text as string) || '').trim();
       if (text) {
         actions.push({
           id: `action_${nanoid(8)}`,

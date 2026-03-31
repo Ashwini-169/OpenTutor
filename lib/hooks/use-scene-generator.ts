@@ -5,7 +5,7 @@ import { useStageStore } from '@/lib/store/stage';
 import { getCurrentModelConfig } from '@/lib/utils/model-config';
 import { useSettingsStore } from '@/lib/store/settings';
 import { db } from '@/lib/utils/database';
-import type { SceneOutline, PdfImage, ImageMapping } from '@/lib/types/generation';
+import type { SceneOutline, PdfImage, ImageMapping, UserRequirements } from '@/lib/types/generation';
 import type { AgentInfo } from '@/lib/generation/generation-pipeline';
 import type { Scene } from '@/lib/types/stage';
 import type { SpeechAction } from '@/lib/types/action';
@@ -406,6 +406,11 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
               const hasSpeech = newScene.actions?.some(a => a.type === 'speech' && !!(a as SpeechAction).text);
               if (!hasSpeech) {
                 isSpeechFailed = true;
+                log.warn('LLM missed speech generation for retry of scene:', scene.id, {
+                  actionsPresent: !!newScene.actions,
+                  actionCount: newScene.actions?.length || 0,
+                  types: newScene.actions?.map(a => a.type)
+                });
                 options.onSceneFailed?.(outline, 'LLM missed speech generation');
               }
 
@@ -491,6 +496,11 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
             const hasSpeech = scene.actions?.some(a => a.type === 'speech' && !!(a as SpeechAction).text);
             if (!hasSpeech) {
               isSpeechFailed = true;
+              log.warn('LLM missed speech generation for scene:', scene.id, {
+                title: scene.title,
+                actionCount: scene.actions?.length || 0,
+                types: scene.actions?.map(a => a.type)
+              });
               options.onSceneFailed?.(outline, 'LLM missed speech generation');
             }
 
@@ -612,11 +622,198 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
     [store, isGenerating],
   );
 
+  const continueLecture = useCallback(
+    async (topic: string) => {
+      const state = store.getState();
+      const { outlines, stage, scenes } = state;
+      if (!stage) return;
+
+      const paramsStr = sessionStorage.getItem('generationParams');
+      const params = lastParamsRef.current || (paramsStr ? JSON.parse(paramsStr) : null);
+      if (!params) return;
+
+      // Reset generation status to completed to avoid interference with the stream reader
+      // if it's currently marked as completed.
+      store.getState().setGenerationStatus('generating');
+
+      try {
+        const existingRequirements = params.requirements || (stage?.description || stage?.name ? { 
+          requirement: stage.description || stage.name || 'Educational course', 
+          language: stage.language || 'en-US' 
+        } as UserRequirements : null);
+
+        if (!existingRequirements) {
+          throw new Error('No course requirements found. Cannot continue lecture without context.');
+        }
+
+        const response = await fetch('/api/generate/scene-outlines-stream', {
+          method: 'POST',
+          headers: getApiHeaders(),
+          body: JSON.stringify({
+            requirements: existingRequirements,
+            pdfText: params.pdfText,
+            pdfImages: params.pdfImages,
+            imageMapping: params.imageMapping,
+            researchContext: params.researchContext,
+            agents: params.agents,
+            existingOutlines: outlines,
+            nextModuleTopic: topic,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          log.error('Failed to fetch more outlines:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData.error,
+            details: errorData.details,
+          });
+          throw new Error(errorData.error || `Failed to fetch more outlines (HTTP ${response.status})`);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No reader available');
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+        const newOutlines: SceneOutline[] = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'outline') {
+                newOutlines.push(data.data);
+                // Pre-append to outlines in store to show in sidebar immediately
+                store.getState().setOutlines([...outlines, ...newOutlines]);
+              } else if (data.type === 'done') {
+                // Final full list from API
+                const finalOutlines = data.outlines;
+                // Merge with existing but keep order
+                const merged = [...outlines];
+                for (const o of finalOutlines) {
+                  if (!merged.some(m => m.id === o.id)) merged.push(o);
+                }
+                store.getState().setOutlines(merged);
+              }
+            }
+          }
+        }
+
+        // After stream is done, start generating the actual scenes for the new outlines
+        generateRemaining(params);
+      } catch (error) {
+        log.error('Failed to continue lecture:', error);
+        store.getState().setGenerationStatus('error');
+      }
+    },
+    [store, generateRemaining],
+  );
+
+  const extendModule = useCallback(
+    async (moduleTitle: string) => {
+      const state = store.getState();
+      const { outlines, stage } = state;
+      if (!stage) return;
+
+      const paramsStr = sessionStorage.getItem('generationParams');
+      const params = lastParamsRef.current || (paramsStr ? JSON.parse(paramsStr) : null);
+      if (!params) return;
+
+      store.getState().setGenerationStatus('generating');
+
+      try {
+        const existingRequirements = params.requirements || (stage?.description || stage?.name ? { 
+          requirement: stage.description || stage.name || 'Educational course', 
+          language: stage.language || 'en-US' 
+        } as UserRequirements : null);
+
+        if (!existingRequirements) {
+          throw new Error('No course requirements found. Cannot continue lecture without context.');
+        }
+
+        const response = await fetch('/api/generate/scene-outlines-stream', {
+          method: 'POST',
+          headers: getApiHeaders(),
+          body: JSON.stringify({
+            requirements: existingRequirements,
+            pdfText: params.pdfText,
+            pdfImages: params.pdfImages,
+            imageMapping: params.imageMapping,
+            researchContext: params.researchContext,
+            agents: params.agents,
+            existingOutlines: outlines,
+            extendModuleTopic: moduleTitle,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          log.error('Failed to extend module:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData.error,
+          });
+          throw new Error(errorData.error || `Failed to extend module (HTTP ${response.status})`);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No reader available');
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+        const newOutlines: SceneOutline[] = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'outline') {
+                newOutlines.push(data.data);
+                store.getState().setOutlines([...outlines, ...newOutlines]);
+              } else if (data.type === 'done') {
+                const finalOutlines = data.outlines;
+                const merged = [...outlines];
+                for (const o of finalOutlines) {
+                  if (!merged.some(m => m.id === o.id)) merged.push(o);
+                }
+                store.getState().setOutlines(merged);
+              }
+            }
+          }
+        }
+
+        generateRemaining(params);
+      } catch (error) {
+        log.error('Failed to extend module:', error);
+        store.getState().setGenerationStatus('error');
+      }
+    },
+    [store, generateRemaining],
+  );
+
   return {
     generateRemaining,
     retrySingleOutline,
     regenerateSpeech,
     stop,
     isGenerating,
+    continueLecture,
+    extendModule,
   };
 }

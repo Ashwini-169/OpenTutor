@@ -123,13 +123,18 @@ export function OutlinesEditor({
                     <span className="bg-primary text-primary-foreground size-6 rounded-full flex items-center justify-center text-sm">
                       {index + 1}
                     </span>
-                    <Input
-                      value={outline.title}
-                      onChange={(e) => updateOutline(index, { title: e.target.value })}
-                      placeholder="Scene Title"
-                      className="flex-1"
-                      disabled={isLoading}
-                    />
+                    <div className="flex flex-col flex-1 gap-1">
+                      <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-70">
+                        {outline.moduleTitle || 'Uncategorized'}
+                      </div>
+                      <Input
+                        value={outline.title}
+                        onChange={(e) => updateOutline(index, { title: e.target.value })}
+                        placeholder="Scene Title"
+                        className="flex-1"
+                        disabled={isLoading}
+                      />
+                    </div>
                   </CardTitle>
                 </div>
                 <Select

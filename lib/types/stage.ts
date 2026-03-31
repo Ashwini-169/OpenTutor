@@ -33,6 +33,7 @@ export interface Scene {
   stageId: string; // ID of the parent stage (for data integrity checks)
   type: SceneType;
   title: string;
+  moduleTitle?: string;
   order: number; // Display order
 
   // Type-specific content

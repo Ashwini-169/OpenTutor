@@ -129,7 +129,7 @@ export function buildCompleteScene(
   actions: Action[],
   stageId: string,
 ): Scene | null {
-  const sceneId = nanoid();
+  const sceneId = outline.id || nanoid();
 
   if (outline.type === 'slide' && 'elements' in content) {
     // Build Slide object
